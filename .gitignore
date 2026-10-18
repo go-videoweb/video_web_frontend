@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.vite/
+.cache/
+.env*
+!.env.example
+src/routeTree.gen.ts
+*.tsbuildinfo
+deploy/k8s/local/
+*.log

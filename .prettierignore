@@ -1,0 +1,12 @@
+node_modules
+dist
+pnpm-lock.yaml
+public/mockServiceWorker.js
+src/routeTree.gen.ts
+src/lib/api/generated.d.ts
+contracts/backend.openapi.yaml
+contracts/effective.openapi.json
+contracts/operations.json
+playwright-report
+test-results
+coverage

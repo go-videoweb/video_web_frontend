@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: videoweb-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: videoweb-frontend
+  template:
+    metadata:
+      labels:
+        app: videoweb-frontend
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+      containers:
+        - name: frontend
+          image: videoweb/frontend:0.1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: API_UPSTREAM
+              value: vw-gateway.videoweb.svc.cluster.local:8001
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: temp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+      volumes:
+        - name: temp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: videoweb-frontend
+spec:
+  selector:
+    app: videoweb-frontend
+  ports:
+    - port: 80
+      targetPort: 8080

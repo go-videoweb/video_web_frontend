@@ -1,0 +1,1594 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /api/v1/captcha/codeCaptcha:
+        get:
+            tags:
+                - Captcha
+            operationId: Captcha_GetCodeCaptcha
+            parameters:
+                - name: email
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.captcha.GetCodeCaptchaResp'
+    /api/v1/captcha/graphicCaptcha:
+        get:
+            tags:
+                - Captcha
+            operationId: Captcha_GetImageCaptcha
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.captcha.GetImageCaptchaResp'
+    /api/v1/favorites:
+        post:
+            tags:
+                - Favorite
+            operationId: Favorite_CreateFavorites
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.favorites.CreateFavoritesReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.favorites.CreateFavoritesResp'
+    /api/v1/favorites/{favoritesId}:
+        delete:
+            tags:
+                - Favorite
+            operationId: Favorite_DeleteFavorites
+            parameters:
+                - name: favoritesId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.favorites.DeleteFavoritesResp'
+        patch:
+            tags:
+                - Favorite
+            operationId: Favorite_ModifyFavorites
+            parameters:
+                - name: favoritesId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.favorites.ModifyFavoritesReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.favorites.ModifyFavoritesResp'
+    /api/v1/user/login:
+        post:
+            tags:
+                - Identity
+            operationId: Identity_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.id.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.id.LoginResp'
+    /api/v1/user/profile/avatar:
+        post:
+            tags:
+                - FileService
+            operationId: FileService_UploadAvatar
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.file.UploadAvatarResp'
+    /api/v1/user/register:
+        post:
+            tags:
+                - Identity
+            operationId: Identity_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.id.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.id.RegisterResp'
+    /api/v1/user/{userId}/logout:
+        post:
+            tags:
+                - Identity
+            operationId: Identity_Logout
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.id.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.id.LogoutResp'
+    /api/v1/userinfo/{userId}:
+        get:
+            tags:
+                - Userinfo
+            operationId: Userinfo_Userinfo
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.UserinfoResp'
+    /api/v1/userinfo/{userId}/forgetPassword:
+        post:
+            tags:
+                - Userinfo
+            operationId: Userinfo_ForgetPassword
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ForgetPasswordReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ForgetPasswordResp'
+    /api/v1/userinfo/{userId}/modifyEmail:
+        post:
+            tags:
+                - Userinfo
+            operationId: Userinfo_ModifyEmail
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyEmailReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyEmailResp'
+    /api/v1/userinfo/{userId}/modifyPassword:
+        post:
+            tags:
+                - Userinfo
+            operationId: Userinfo_ModifyPassword
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyPasswordReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyPasswordResp'
+    /api/v1/userinfo/{userId}/modifySignature:
+        post:
+            tags:
+                - Userinfo
+            operationId: Userinfo_ModifyUserSignature
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifySignatureReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifySignatureResp'
+    /api/v1/userinfo/{userId}/modifyUsername:
+        post:
+            tags:
+                - Userinfo
+            operationId: Userinfo_ModifyUsername
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyUsernameReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.userinfo.ModifyUsernameResp'
+    /api/v1/video/interaction/{videoId}/barrage/send:
+        post:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoSendBarrage
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoSendBarrageReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoSendBarrageResp'
+    /api/v1/video/interaction/{videoId}/barrage/upvote:
+        put:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoUpvoteBarrage
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoUpvoteBarrageReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoUpvoteBarrageResp'
+    /api/v1/video/interaction/{videoId}/favorite:
+        put:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoFavorite
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoFavoriteReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoFavoriteResp'
+    /api/v1/video/interaction/{videoId}/share:
+        get:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoShare
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoShareResp'
+    /api/v1/video/interaction/{videoId}/throwShells:
+        put:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoThrowShells
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoThrowShellsReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoThrowShellsResp'
+    /api/v1/video/interaction/{videoId}/upvote:
+        put:
+            tags:
+                - VideoInteract
+            operationId: VideoInteract_VideoUpvote
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoUpvoteReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.interact.VideoUpvoteResp'
+    /api/v1/video/list:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_GetVideoList
+            parameters:
+                - name: class
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.GetVideoListResp'
+    /api/v1/video/{videoId}/comment:
+        get:
+            tags:
+                - VideoComment
+            operationId: VideoComment_GetCommentList
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: sortBy
+                  in: query
+                  schema:
+                    type: string
+                - name: order
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.comment.GetCommentListResp'
+        post:
+            tags:
+                - VideoComment
+            operationId: VideoComment_CommentVideo
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.comment.CommentVideoReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.comment.CommentVideoResp'
+    /api/v1/video/{videoId}/comment/{commentId}/upvote:
+        put:
+            tags:
+                - VideoComment
+            operationId: VideoComment_UpvoteComment
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: commentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.comment.UpvoteCommentReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.comment.UpvoteCommentResp'
+    /api/v1/video/{videoId}/comments/{commentId}/replies:
+        get:
+            tags:
+                - VideoComment
+            operationId: VideoComment_GetCommentReplies
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: commentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: sortBy
+                  in: query
+                  schema:
+                    type: string
+                - name: order
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.comment.GetCommentRepliesResp'
+    /api/v1/video/{videoId}/info:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_GetVideoInfo
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.GetVideoInfoResp'
+    /api/v1/{userId}/follow:
+        put:
+            tags:
+                - Follow
+            operationId: Follow_UnfollowUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.follow.UnfollowUserReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.follow.UnfollowUserResp'
+        post:
+            tags:
+                - Follow
+            operationId: Follow_FollowUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.follow.FollowUserReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.follow.FollowUserResp'
+    /api/v1/{userId}/followList:
+        get:
+            tags:
+                - Follow
+            operationId: Follow_GetFolloweeInfo
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: followListId
+                  in: query
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.follow.GetFolloweeInfoResp'
+    /api/v1/{userId}/profile/avatar:
+        put:
+            tags:
+                - FileService
+            operationId: FileService_UpdateAvatar
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.user.file.UpdateAvatarReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.user.file.UpdateAvatarResp'
+    /api/v1/{userId}/video/metaInfo:
+        post:
+            tags:
+                - VideoInfo
+            description: |-
+                Request Order: 1. UploadVideoInfo 2. UploadVideoFile 3. UploadVideoCover
+                 1(UploadVideoInfo) Will Create a new directory for the video,
+                 2(UploadVideoFile) and 3(UploadVideoCover) will upload the video file and cover file to the directory.
+                 The order of 2 and 3 is not important.
+            operationId: VideoInfo_UploadVideoInfo
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoInfoReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoInfoResp'
+    /api/v1/{userId}/video/{videoId}/cover:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_GetVideoCover
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.FileResp'
+        post:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_UploadVideoCover
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoCoverReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoCoverResp'
+    /api/v1/{userId}/video/{videoId}/dash/mpd:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_GetMpd
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.FileResp'
+    /api/v1/{userId}/video/{videoId}/dash/{segmentName}:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_GetSegments
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: segmentName
+                  in: path
+                  description: MPD 中的单个 .m4s 文件名，不包含目录或 URL。
+                  required: true
+                  schema:
+                    type: string
+                - name: segmentPath
+                  in: query
+                  description: 保留旧字段编号以识别旧请求；非空时拒绝，不再接受服务器文件路径。
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.FileResp'
+    /api/v1/{userId}/video/{videoId}/file:
+        get:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_DownloadVideo
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.FileResp'
+        post:
+            tags:
+                - VideoInfo
+            operationId: VideoInfo_UploadVideoFile
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoFileReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.UploadVideoFileResp'
+components:
+    schemas:
+        gateway.api.v1.user.captcha.GetCodeCaptchaResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+                code:
+                    type: string
+        gateway.api.v1.user.captcha.GetImageCaptchaResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+                captchaResult:
+                    $ref: '#/components/schemas/gateway.api.v1.user.captcha.GetImageCaptchaResp_CaptchaResult'
+        gateway.api.v1.user.captcha.GetImageCaptchaResp_CaptchaResult:
+            type: object
+            properties:
+                id:
+                    type: string
+                b64log:
+                    type: string
+                answer:
+                    type: string
+        gateway.api.v1.user.favorites.CreateFavoritesReq:
+            type: object
+            properties:
+                favoritesName:
+                    type: string
+                isPrivate:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+                userId:
+                    type: string
+        gateway.api.v1.user.favorites.CreateFavoritesResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+        gateway.api.v1.user.favorites.DeleteFavoritesResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+        gateway.api.v1.user.favorites.ModifyFavoritesReq:
+            type: object
+            properties:
+                favoritesId:
+                    type: string
+                favoritesName:
+                    type: string
+                isPrivate:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+        gateway.api.v1.user.favorites.ModifyFavoritesResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+        gateway.api.v1.user.file.UpdateAvatarReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+        gateway.api.v1.user.file.UpdateAvatarResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.user.file.UploadAvatarResp:
+            type: object
+            properties:
+                filePath:
+                    type: string
+        gateway.api.v1.user.follow.FollowUserReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                followerUserId:
+                    type: string
+                followListId:
+                    type: string
+        gateway.api.v1.user.follow.FollowUserResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.user.follow.GetFolloweeInfoResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                followeeInfo:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/gateway.api.v1.user.follow.GetFolloweeInfoResp_UserSummary'
+        gateway.api.v1.user.follow.GetFolloweeInfoResp_UserSummary:
+            type: object
+            properties:
+                username:
+                    type: string
+                avatarPath:
+                    type: string
+                gender:
+                    type: integer
+                    format: int32
+                signature:
+                    type: string
+                email:
+                    type: string
+                birthday:
+                    type: string
+                    format: date-time
+        gateway.api.v1.user.follow.UnfollowUserReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                followedUserId:
+                    type: string
+        gateway.api.v1.user.follow.UnfollowUserResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.user.id.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+            description: 用户登录所需请求、响应
+        gateway.api.v1.user.id.LoginResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    description: app status code,The same below
+                    format: int32
+                msg:
+                    type: string
+                    description: app response message,The same below
+                data:
+                    $ref: '#/components/schemas/gateway.api.v1.user.id.LoginResp_Data'
+        gateway.api.v1.user.id.LoginResp_Data:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                userId:
+                    type: string
+            description: when users login successfully, return their ID and two tokens
+        gateway.api.v1.user.id.LogoutRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+            description: 用户注销所需请求、响应
+        gateway.api.v1.user.id.LogoutResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+        gateway.api.v1.user.id.RegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                repeatPassword:
+                    type: string
+                gender:
+                    type: integer
+                    format: int32
+                email:
+                    type: string
+                birthday:
+                    type: string
+                signature:
+                    type: string
+                inputCode:
+                    type: string
+            description: 用户注册所需请求、响应
+        gateway.api.v1.user.id.RegisterResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                msg:
+                    type: string
+                data:
+                    $ref: '#/components/schemas/gateway.api.v1.user.id.RegisterResp_Data'
+        gateway.api.v1.user.id.RegisterResp_Data:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+        gateway.api.v1.user.userinfo.CommonResp:
+            type: object
+            properties:
+                status:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.user.userinfo.ForgetPasswordReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                email:
+                    type: string
+                newPassword:
+                    type: string
+                inputCode:
+                    type: string
+        gateway.api.v1.user.userinfo.ForgetPasswordResp:
+            type: object
+            properties:
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.user.userinfo.ModifyEmailReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                email:
+                    type: string
+                inputCode:
+                    type: string
+        gateway.api.v1.user.userinfo.ModifyEmailResp:
+            type: object
+            properties:
+                email:
+                    type: string
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.user.userinfo.ModifyPasswordReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+        gateway.api.v1.user.userinfo.ModifyPasswordResp:
+            type: object
+            properties:
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.user.userinfo.ModifySignatureReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                signature:
+                    type: string
+        gateway.api.v1.user.userinfo.ModifySignatureResp:
+            type: object
+            properties:
+                newSignature:
+                    type: string
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.user.userinfo.ModifyUsernameReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                newUsername:
+                    type: string
+        gateway.api.v1.user.userinfo.ModifyUsernameResp:
+            type: object
+            properties:
+                newUsername:
+                    type: string
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.user.userinfo.UserInfo:
+            type: object
+            properties:
+                userName:
+                    type: string
+                email:
+                    type: string
+                signature:
+                    type: string
+                shells:
+                    type: integer
+                    format: int32
+                cntFans:
+                    type: integer
+                    format: int32
+                cntFollows:
+                    type: integer
+                    format: int32
+                cntVideos:
+                    type: integer
+                    format: int32
+                avatarPath:
+                    type: string
+                gender:
+                    type: integer
+                    format: int32
+                birthday:
+                    type: string
+        gateway.api.v1.user.userinfo.UserinfoResp:
+            type: object
+            properties:
+                userInfo:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.UserInfo'
+                common:
+                    $ref: '#/components/schemas/gateway.api.v1.user.userinfo.CommonResp'
+        gateway.api.v1.video.comment.CommentInfo:
+            type: object
+            properties:
+                commentId:
+                    type: string
+                publisherId:
+                    type: string
+                rootId:
+                    type: string
+                content:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                upvoteCount:
+                    type: string
+                ipAddress:
+                    type: string
+                cntReplies:
+                    type: integer
+                    format: uint32
+        gateway.api.v1.video.comment.CommentVideoReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                parentId:
+                    type: string
+                content:
+                    type: string
+        gateway.api.v1.video.comment.CommentVideoResp:
+            type: object
+            properties:
+                commentId:
+                    type: string
+        gateway.api.v1.video.comment.GetCommentListResp:
+            type: object
+            properties:
+                comments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/gateway.api.v1.video.comment.CommentInfo'
+                totalCount:
+                    type: integer
+                    format: int32
+        gateway.api.v1.video.comment.GetCommentRepliesResp:
+            type: object
+            properties:
+                replies:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/gateway.api.v1.video.comment.CommentInfo'
+        gateway.api.v1.video.comment.UpvoteCommentReq:
+            type: object
+            properties:
+                commentId:
+                    type: string
+                videoId:
+                    type: string
+                isUpvote:
+                    type: boolean
+                    description: |-
+                        If is_upvote is true, the user has upvoted the comment before, so we need to cancel the upvote.
+                         Otherwise, the user has not upvoted the comment before, so we need to add the upvote.
+        gateway.api.v1.video.comment.UpvoteCommentResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.interact.VideoFavoriteReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                favoriteId:
+                    type: string
+        gateway.api.v1.video.interact.VideoFavoriteResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.interact.VideoSendBarrageReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                content:
+                    type: string
+                color:
+                    type: string
+                time:
+                    type: string
+                upvoteCount:
+                    type: string
+        gateway.api.v1.video.interact.VideoSendBarrageResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.interact.VideoShareResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                url:
+                    type: string
+        gateway.api.v1.video.interact.VideoThrowShellsReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                shells:
+                    type: integer
+                    format: int32
+        gateway.api.v1.video.interact.VideoThrowShellsResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.interact.VideoUpvoteBarrageReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                barrageId:
+                    type: string
+        gateway.api.v1.video.interact.VideoUpvoteBarrageResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.interact.VideoUpvoteReq:
+            type: object
+            properties:
+                videoId:
+                    type: string
+        gateway.api.v1.video.interact.VideoUpvoteResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.videoinfo.CommonResp:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+        gateway.api.v1.video.videoinfo.FileResp:
+            type: object
+            properties:
+                filePath:
+                    type: string
+                filename:
+                    type: string
+                headers:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.FileResp_HeaderValues'
+        gateway.api.v1.video.videoinfo.FileResp_HeaderValues:
+            type: object
+            properties:
+                value:
+                    type: array
+                    items:
+                        type: string
+        gateway.api.v1.video.videoinfo.GetVideoInfoResp:
+            type: object
+            properties:
+                videoDetail:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.VideoMetaInfo'
+        gateway.api.v1.video.videoinfo.GetVideoListResp:
+            type: object
+            properties:
+                VideoSummary:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.VideoSummary'
+        gateway.api.v1.video.videoinfo.UploadVideoCoverReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                videoId:
+                    type: string
+        gateway.api.v1.video.videoinfo.UploadVideoCoverResp:
+            type: object
+            properties:
+                resp:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.CommonResp'
+        gateway.api.v1.video.videoinfo.UploadVideoFileReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                videoId:
+                    type: string
+        gateway.api.v1.video.videoinfo.UploadVideoFileResp:
+            type: object
+            properties:
+                resp:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.CommonResp'
+        gateway.api.v1.video.videoinfo.UploadVideoInfoReq:
+            type: object
+            properties:
+                userId:
+                    type: string
+                videoInfo:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.VideoMetaInfo'
+        gateway.api.v1.video.videoinfo.UploadVideoInfoResp:
+            type: object
+            properties:
+                resp:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.CommonResp'
+                videoId:
+                    type: string
+        gateway.api.v1.video.videoinfo.VideoMetaInfo:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                publisherId:
+                    type: string
+                publisherName:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                videoPath:
+                    type: string
+                classes:
+                    type: array
+                    items:
+                        type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                hot:
+                    type: string
+                createdTime:
+                    type: string
+                    format: date-time
+                records:
+                    $ref: '#/components/schemas/gateway.api.v1.video.videoinfo.VideoMetaInfo_Records'
+                duration:
+                    type: string
+                coverPath:
+                    type: string
+        gateway.api.v1.video.videoinfo.VideoMetaInfo_Records:
+            type: object
+            properties:
+                cntBarrages:
+                    type: integer
+                    format: uint32
+                cntShares:
+                    type: integer
+                    format: uint32
+                cntViewed:
+                    type: integer
+                    format: uint32
+                cntFavorites:
+                    type: integer
+                    format: uint32
+        gateway.api.v1.video.videoinfo.VideoSummary:
+            type: object
+            properties:
+                videoId:
+                    type: string
+                cntBarrages:
+                    type: string
+                cntViewed:
+                    type: string
+                title:
+                    type: string
+                duration:
+                    type: string
+                publisherName:
+                    type: string
+                coverPath:
+                    type: string
+                description:
+                    type: string
+                videoPath:
+                    type: string
+                createdTime:
+                    type: string
+                    format: date-time
+tags:
+    - name: Captcha
+    - name: Favorite
+    - name: FileService
+    - name: Follow
+    - name: Identity
+      description: 用户身份相关服务
+    - name: Userinfo
+    - name: VideoComment
+    - name: VideoInfo
+    - name: VideoInteract

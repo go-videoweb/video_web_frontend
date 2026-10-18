@@ -1,0 +1,13 @@
+Sintel trailer and the 18-second resized/re-encoded DASH excerpt:
+Copyright Blender Foundation | https://durian.blender.org
+Director: Colin Levy. Original work: 2010.
+License: Creative Commons Attribution 3.0
+https://creativecommons.org/licenses/by/3.0/
+Attribution requirements: https://durian.blender.org/sharing/
+Original trailer: https://media.w3.org/2010/05/sintel/trailer.mp4
+The DASH excerpt was scaled to 960px width, trimmed to 18 seconds,
+and re-encoded as H.264/AAC for local playback tests.
+
+Cover photo sources and Unsplash license:
+See docs/媒体来源与许可.md in the source repository.
+https://unsplash.com/license

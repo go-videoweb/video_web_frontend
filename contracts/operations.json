@@ -1,0 +1,196 @@
+{
+  "backendCommit": "b87a6830",
+  "sourceSha256": "83a942f147d52913a12c10ad2231805937e2c7e3f39db4dae2cbdd82b5580066",
+  "operations": [
+    {
+      "id": "Captcha_GetCodeCaptcha",
+      "method": "GET",
+      "path": "/api/v1/captcha/codeCaptcha"
+    },
+    {
+      "id": "Captcha_GetImageCaptcha",
+      "method": "GET",
+      "path": "/api/v1/captcha/graphicCaptcha"
+    },
+    {
+      "id": "Favorite_CreateFavorites",
+      "method": "POST",
+      "path": "/api/v1/favorites"
+    },
+    {
+      "id": "Favorite_DeleteFavorites",
+      "method": "DELETE",
+      "path": "/api/v1/favorites/{favoritesId}"
+    },
+    {
+      "id": "Favorite_ModifyFavorites",
+      "method": "PATCH",
+      "path": "/api/v1/favorites/{favoritesId}"
+    },
+    {
+      "id": "FileService_UpdateAvatar",
+      "method": "PUT",
+      "path": "/api/v1/{userId}/profile/avatar"
+    },
+    {
+      "id": "FileService_UploadAvatar",
+      "method": "POST",
+      "path": "/api/v1/user/profile/avatar"
+    },
+    {
+      "id": "Follow_FollowUser",
+      "method": "POST",
+      "path": "/api/v1/{userId}/follow"
+    },
+    {
+      "id": "Follow_GetFolloweeInfo",
+      "method": "GET",
+      "path": "/api/v1/{userId}/followList"
+    },
+    {
+      "id": "Follow_UnfollowUser",
+      "method": "PUT",
+      "path": "/api/v1/{userId}/follow"
+    },
+    {
+      "id": "Identity_Login",
+      "method": "POST",
+      "path": "/api/v1/user/login"
+    },
+    {
+      "id": "Identity_Logout",
+      "method": "POST",
+      "path": "/api/v1/user/{userId}/logout"
+    },
+    {
+      "id": "Identity_Register",
+      "method": "POST",
+      "path": "/api/v1/user/register"
+    },
+    {
+      "id": "Userinfo_ForgetPassword",
+      "method": "POST",
+      "path": "/api/v1/userinfo/{userId}/forgetPassword"
+    },
+    {
+      "id": "Userinfo_ModifyEmail",
+      "method": "POST",
+      "path": "/api/v1/userinfo/{userId}/modifyEmail"
+    },
+    {
+      "id": "Userinfo_ModifyPassword",
+      "method": "POST",
+      "path": "/api/v1/userinfo/{userId}/modifyPassword"
+    },
+    {
+      "id": "Userinfo_ModifyUsername",
+      "method": "POST",
+      "path": "/api/v1/userinfo/{userId}/modifyUsername"
+    },
+    {
+      "id": "Userinfo_ModifyUserSignature",
+      "method": "POST",
+      "path": "/api/v1/userinfo/{userId}/modifySignature"
+    },
+    {
+      "id": "Userinfo_Userinfo",
+      "method": "GET",
+      "path": "/api/v1/userinfo/{userId}"
+    },
+    {
+      "id": "VideoComment_CommentVideo",
+      "method": "POST",
+      "path": "/api/v1/video/{videoId}/comment"
+    },
+    {
+      "id": "VideoComment_GetCommentList",
+      "method": "GET",
+      "path": "/api/v1/video/{videoId}/comment"
+    },
+    {
+      "id": "VideoComment_GetCommentReplies",
+      "method": "GET",
+      "path": "/api/v1/video/{videoId}/comments/{commentId}/replies"
+    },
+    {
+      "id": "VideoComment_UpvoteComment",
+      "method": "PUT",
+      "path": "/api/v1/video/{videoId}/comment/{commentId}/upvote"
+    },
+    {
+      "id": "VideoInfo_DownloadVideo",
+      "method": "GET",
+      "path": "/api/v1/{userId}/video/{videoId}/file"
+    },
+    {
+      "id": "VideoInfo_GetMpd",
+      "method": "GET",
+      "path": "/api/v1/{userId}/video/{videoId}/dash/mpd"
+    },
+    {
+      "id": "VideoInfo_GetSegments",
+      "method": "GET",
+      "path": "/api/v1/{userId}/video/{videoId}/dash/{segmentName}"
+    },
+    {
+      "id": "VideoInfo_GetVideoCover",
+      "method": "GET",
+      "path": "/api/v1/{userId}/video/{videoId}/cover"
+    },
+    {
+      "id": "VideoInfo_GetVideoInfo",
+      "method": "GET",
+      "path": "/api/v1/video/{videoId}/info"
+    },
+    {
+      "id": "VideoInfo_GetVideoList",
+      "method": "GET",
+      "path": "/api/v1/video/list"
+    },
+    {
+      "id": "VideoInfo_UploadVideoCover",
+      "method": "POST",
+      "path": "/api/v1/{userId}/video/{videoId}/cover"
+    },
+    {
+      "id": "VideoInfo_UploadVideoFile",
+      "method": "POST",
+      "path": "/api/v1/{userId}/video/{videoId}/file"
+    },
+    {
+      "id": "VideoInfo_UploadVideoInfo",
+      "method": "POST",
+      "path": "/api/v1/{userId}/video/metaInfo"
+    },
+    {
+      "id": "VideoInteract_VideoFavorite",
+      "method": "PUT",
+      "path": "/api/v1/video/interaction/{videoId}/favorite"
+    },
+    {
+      "id": "VideoInteract_VideoSendBarrage",
+      "method": "POST",
+      "path": "/api/v1/video/interaction/{videoId}/barrage/send"
+    },
+    {
+      "id": "VideoInteract_VideoShare",
+      "method": "GET",
+      "path": "/api/v1/video/interaction/{videoId}/share"
+    },
+    {
+      "id": "VideoInteract_VideoThrowShells",
+      "method": "PUT",
+      "path": "/api/v1/video/interaction/{videoId}/throwShells"
+    },
+    {
+      "id": "VideoInteract_VideoUpvote",
+      "method": "PUT",
+      "path": "/api/v1/video/interaction/{videoId}/upvote"
+    },
+    {
+      "id": "VideoInteract_VideoUpvoteBarrage",
+      "method": "PUT",
+      "path": "/api/v1/video/interaction/{videoId}/barrage/upvote"
+    }
+  ]
+}
