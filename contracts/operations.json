@@ -1,6 +1,6 @@
 {
   "backendCommit": "b87a6830",
-  "sourceSha256": "83a942f147d52913a12c10ad2231805937e2c7e3f39db4dae2cbdd82b5580066",
+  "sourceSha256": "a579e6ade52fa342c9dbd79d3c66dc3c240abef61bf6736763a9c254a3836369",
   "operations": [
     {
       "id": "Captcha_GetCodeCaptcha",

@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
+    "test": "node --test scripts/contracts.test.mjs && vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "api:generate": "node scripts/contracts.mjs",

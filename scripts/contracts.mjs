@@ -6,7 +6,10 @@ import YAML from 'yaml'
 import openapiTS, { astToString } from 'openapi-typescript'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const source = await fs.readFile(path.join(root, 'contracts/backend.openapi.yaml'), 'utf8')
+// Git 检出可能改变 CRLF/LF，来源哈希使用统一换行，避免平台差异被误判为契约变化。
+const source = (
+  await fs.readFile(path.join(root, 'contracts/backend.openapi.yaml'), 'utf8')
+).replace(/\r\n/g, '\n')
 const schema = YAML.parse(source)
 const operations = []
 for (const [url, methods] of Object.entries(schema.paths)) {
