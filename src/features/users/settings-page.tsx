@@ -9,7 +9,8 @@ import { session, useSession } from '@/features/auth/session'
 import { sendEmailCode } from '@/features/auth/api'
 import { getUser, updateUser, uploadAvatar } from '@/features/users/api'
 import type { UserInfo } from '@/lib/api/models'
-import { errorMessage } from '@/lib/api/client'
+import { ApiError, errorMessage } from '@/lib/api/client'
+import { codeRule, emailRule, passwordRule } from '@/features/auth/password-rules'
 import { publicImage } from '@/lib/utils'
 import { Avatar } from '@/components/layout/shell'
 import { Button } from '@/components/ui/button'
@@ -20,13 +21,13 @@ const nameSchema = z.object({
 const passwordSchema = z
   .object({
     oldPassword: z.string().min(1, '请输入当前密码'),
-    newPassword: z.string().min(8, '新密码至少 8 位'),
+    newPassword: passwordRule,
     repeat: z.string(),
   })
   .refine((v) => v.newPassword === v.repeat, { path: ['repeat'], message: '两次密码不一致' })
 const emailSchema = z.object({
-  email: z.email('请输入有效邮箱'),
-  inputCode: z.string().trim().min(1, '请输入验证码'),
+  email: emailRule,
+  inputCode: codeRule,
 })
 
 /** 账户设置按后端独立操作提交，成功后精确刷新资料缓存。 */
@@ -116,10 +117,19 @@ function ProfileSettings({ userId, user }: { userId: string; user: UserInfo }) {
     onError: (error) => toast.error(errorMessage(error)),
   })
   const avatar = useMutation({
-    mutationFn: (file: File) => uploadAvatar(file, userId),
-    onSuccess: () => {
+    mutationFn: (file: File) => uploadAvatar(file),
+    onSuccess: ({ avatarUrl }) => {
       toast.success('头像已上传')
-      void client.invalidateQueries({ queryKey: ['user', userId] })
+      client.setQueryData<UserInfo>(
+        ['user', userId],
+        (old) =>
+          old && {
+            ...old,
+            avatarPath: avatarUrl
+              ? avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 'v=' + Date.now()
+              : old.avatarPath,
+          },
+      )
     },
     onError: (error) => {
       setPreviewUrl('')
@@ -226,6 +236,16 @@ function PasswordSettings({ userId }: { userId: string }) {
             session.set(null)
             toast.success('密码已修改，请重新登录')
           } catch (error) {
+            if (
+              error instanceof ApiError &&
+              error.reason === 'PASSWORD_SESSION_INVALIDATION_FAILED' &&
+              error.metadata.password_changed === 'true'
+            ) {
+              form.reset()
+              session.set(null)
+              toast.warning('密码已修改，请用新密码登录；旧会话尚未确认撤销')
+              return
+            }
             form.setError('root', { message: errorMessage(error) })
           }
         })}
@@ -274,7 +294,7 @@ function EmailSettings({ userId }: { userId: string }) {
     if (!(await form.trigger('email'))) return
     setSending(true)
     try {
-      await sendEmailCode(form.getValues('email'))
+      await sendEmailCode(emailRule.parse(form.getValues('email')), 'change_email')
       setCooldown(60)
       toast.success('验证码已发送')
     } catch (error) {

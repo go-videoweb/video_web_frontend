@@ -1,3 +1,4 @@
+import { config } from './config'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -45,6 +46,9 @@ export function playbackTime(seconds: number) {
 /** 只允许本站或 http(s) 资源，文件系统路径不能直接用于图片。 */
 export function publicImage(value?: string): string | undefined {
   if (!value || value.includes('\\') || /^[a-z]:/i.test(value)) return undefined
+  if (/^\/api\/v1\/users\/[1-9]\d*\/avatar(?:\?|$)/.test(value)) {
+    return new URL(value, new URL(config.apiBase, window.location.origin).origin).href
+  }
   if (/^https?:\/\//i.test(value) || (value.startsWith('/') && !value.startsWith('//')))
     return value
   return undefined

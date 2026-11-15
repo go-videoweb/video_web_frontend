@@ -1,6 +1,6 @@
 {
-  "backendCommit": "b87a6830",
-  "sourceSha256": "a579e6ade52fa342c9dbd79d3c66dc3c240abef61bf6736763a9c254a3836369",
+  "backendCommit": "ba2604fd",
+  "sourceSha256": "b1c040bfac090f4b9253c818c0d28f51cb81fbdc2d242b727aa7f2a549ebc6e4",
   "operations": [
     {
       "id": "Captcha_GetCodeCaptcha",
@@ -23,19 +23,34 @@
       "path": "/api/v1/favorites/{favoritesId}"
     },
     {
+      "id": "Favorite_GetFavoritesList",
+      "method": "GET",
+      "path": "/api/v1/favorites/list"
+    },
+    {
       "id": "Favorite_ModifyFavorites",
       "method": "PATCH",
       "path": "/api/v1/favorites/{favoritesId}"
     },
     {
-      "id": "FileService_UpdateAvatar",
-      "method": "PUT",
-      "path": "/api/v1/{userId}/profile/avatar"
+      "id": "FileService_GetAvatar",
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/avatar"
     },
     {
-      "id": "FileService_UploadAvatar",
-      "method": "POST",
+      "id": "FileService_UpdateAvatar",
+      "method": "PUT",
       "path": "/api/v1/user/profile/avatar"
+    },
+    {
+      "id": "Follow_CreateFollowList",
+      "method": "POST",
+      "path": "/api/v1/follow-lists"
+    },
+    {
+      "id": "Follow_DeleteFollowLists",
+      "method": "POST",
+      "path": "/api/v1/follow-lists/batch-delete"
     },
     {
       "id": "Follow_FollowUser",
@@ -46,6 +61,31 @@
       "id": "Follow_GetFolloweeInfo",
       "method": "GET",
       "path": "/api/v1/{userId}/followList"
+    },
+    {
+      "id": "Follow_GetFollowLists",
+      "method": "GET",
+      "path": "/api/v1/follow-lists"
+    },
+    {
+      "id": "Follow_GetFollowRelation",
+      "method": "GET",
+      "path": "/api/v1/follow/relations/{targetUserId}"
+    },
+    {
+      "id": "Follow_ModifyFollowList",
+      "method": "PATCH",
+      "path": "/api/v1/follow-lists/{followListId}"
+    },
+    {
+      "id": "Follow_MoveFollowee",
+      "method": "PUT",
+      "path": "/api/v1/follow/relations/{targetUserId}/list"
+    },
+    {
+      "id": "Follow_SetDefaultFollowList",
+      "method": "PUT",
+      "path": "/api/v1/follow-lists/{followListId}/default"
     },
     {
       "id": "Follow_UnfollowUser",
@@ -70,7 +110,7 @@
     {
       "id": "Userinfo_ForgetPassword",
       "method": "POST",
-      "path": "/api/v1/userinfo/{userId}/forgetPassword"
+      "path": "/api/v1/userinfo/forgetPassword"
     },
     {
       "id": "Userinfo_ModifyEmail",
@@ -123,6 +163,11 @@
       "path": "/api/v1/{userId}/video/{videoId}/file"
     },
     {
+      "id": "VideoInfo_GetFavoriteVideos",
+      "method": "GET",
+      "path": "/api/v1/favorites/{favoritesId}/videos"
+    },
+    {
       "id": "VideoInfo_GetMpd",
       "method": "GET",
       "path": "/api/v1/{userId}/video/{videoId}/dash/mpd"
@@ -148,6 +193,11 @@
       "path": "/api/v1/video/list"
     },
     {
+      "id": "VideoInfo_GetVideoUploadStatus",
+      "method": "GET",
+      "path": "/api/v1/video/{videoId}/upload-status"
+    },
+    {
       "id": "VideoInfo_UploadVideoCover",
       "method": "POST",
       "path": "/api/v1/{userId}/video/{videoId}/cover"
@@ -161,6 +211,11 @@
       "id": "VideoInfo_UploadVideoInfo",
       "method": "POST",
       "path": "/api/v1/{userId}/video/metaInfo"
+    },
+    {
+      "id": "VideoInteract_GetBarrages",
+      "method": "GET",
+      "path": "/api/v1/video/{videoId}/barrages"
     },
     {
       "id": "VideoInteract_VideoFavorite",

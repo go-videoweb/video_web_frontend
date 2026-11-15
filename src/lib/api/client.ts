@@ -8,6 +8,7 @@ export class ApiError extends Error {
     message: string,
     public metadata: Record<string, string> = {},
     public status = 200,
+    public reason = '',
   ) {
     super(message)
     this.name = 'ApiError'
@@ -71,6 +72,7 @@ export function businessError(data: unknown, status = 200): ApiError | null {
         ),
       ),
       status,
+      root.reason,
     )
   }
   for (const item of [root, record(root.resp), record(root.common)]) {

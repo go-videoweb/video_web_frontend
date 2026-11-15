@@ -21,8 +21,8 @@ export async function login(username: string, password: string) {
   return data
 }
 
-/** 注册完成后进入登录，以建立后端缓存支持的会话。 */
-export function registerAccount(body: {
+/** 注册成功返回完整会话；失败由表单区分账号已创建与未确认结果。 */
+export async function registerAccount(body: {
   username: string
   password: string
   repeatPassword: string
@@ -32,12 +32,26 @@ export function registerAccount(body: {
   gender?: number
   signature?: string
 }) {
-  return request('/user/register', { method: 'POST', auth: false, body })
+  const result = await request('/user/register', { method: 'POST', auth: false, body })
+  const data = loginResponse.parse(result).data
+  session.set(data)
+  return data
 }
 
 /** 验证码由服务端发送和验证，响应中的测试码不展示给用户。 */
-export function sendEmailCode(email: string) {
-  return request(`/captcha/codeCaptcha?${new URLSearchParams({ email })}`, { auth: false })
+export function sendEmailCode(
+  email: string,
+  purpose: 'register' | 'change_email' | 'reset_password',
+) {
+  return request(`/captcha/codeCaptcha?${new URLSearchParams({ email, purpose })}`, {
+    auth: false,
+    cache: 'no-store',
+  })
+}
+
+/** 忘记密码不携带旧凭据；调用方在确认密码已更新后清除旧会话。 */
+export function resetPassword(body: { email: string; inputCode: string; newPassword: string }) {
+  return request('/userinfo/forgetPassword', { method: 'POST', auth: false, body })
 }
 
 /** 图形验证码暂未绑定登录验证流程，只保留真实接口适配。 */

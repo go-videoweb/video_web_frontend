@@ -9,6 +9,9 @@ import { login, registerAccount, sendEmailCode } from './api'
 import { config, switchMode } from '@/lib/config'
 import { errorMessage } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
+import { ApiError } from '@/lib/api/client'
+import { uploadAvatar } from '@/features/users/api'
+import { codeRule, emailRule, passwordRule } from './password-rules'
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, '请输入用户名'),
@@ -17,11 +20,11 @@ const loginSchema = z.object({
 const registerSchema = z
   .object({
     username: z.string().trim().min(2, '用户名至少 2 个字符').max(32),
-    email: z.email('请输入有效邮箱'),
-    password: z.string().min(8, '密码至少 8 位'),
+    email: emailRule,
+    password: passwordRule,
     repeatPassword: z.string(),
     birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '请选择生日'),
-    inputCode: z.string().trim().min(1, '请输入邮箱验证码'),
+    inputCode: codeRule,
   })
   .refine((data) => data.password === data.repeatPassword, {
     path: ['repeatPassword'],
@@ -79,6 +82,7 @@ export function AuthPage({
             <p>{registration ? '从这里，开启你的分享之旅。' : '继续发现与分享你的热爱。'}</p>
           </div>
           {registration ? <RegisterForm /> : <LoginForm redirect={redirect} />}
+          {!registration && <Link to="/forgot-password">忘记密码</Link>}
           <p className="auth-switch">
             {registration ? '已经有账户？' : '还没有账户？'}
             <Link
@@ -172,6 +176,14 @@ function LoginForm({ redirect }: { redirect: string }) {
 
 function RegisterForm() {
   const router = useRouter()
+  const [avatar, setAvatar] = useState<File>()
+  const [preview, setPreview] = useState('')
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview)
+    },
+    [preview],
+  )
   const [cooldown, setCooldown] = useState(0)
   const [sending, setSending] = useState(false)
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -194,7 +206,7 @@ function RegisterForm() {
     if (!(await form.trigger('email'))) return
     setSending(true)
     try {
-      await sendEmailCode(form.getValues('email'))
+      await sendEmailCode(emailRule.parse(form.getValues('email')), 'register')
       setCooldown(60)
       toast.success('验证码已发送')
     } catch (error) {
@@ -206,10 +218,27 @@ function RegisterForm() {
   const submit = form.handleSubmit(async (values) => {
     try {
       await registerAccount(values)
-      toast.success('注册成功，请登录')
-      router.history.replace('/login')
+      if (avatar) {
+        try {
+          await uploadAvatar(avatar)
+        } catch {
+          toast.warning('账号已注册，头像上传失败，可在账户设置重试')
+        }
+      }
+      toast.success('注册成功')
+      router.history.replace('/')
       await router.load()
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        error.reason === 'REGISTRATION_SESSION_FAILED' &&
+        error.metadata.user_created === 'true'
+      ) {
+        toast.warning('账号已创建，请登录后继续')
+        router.history.replace('/login')
+        await router.load()
+        return
+      }
       form.setError('root', { message: errorMessage(error) })
     }
   })
@@ -272,6 +301,26 @@ function RegisterForm() {
           {form.formState.errors.root.message}
         </p>
       )}
+      <label>
+        头像（可选）
+        {preview && <img src={preview} alt="头像预览" width={64} height={64} />}
+        <input
+          type="file"
+          accept="image/jpeg,image/png"
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            setAvatar(undefined)
+            setPreview('')
+            if (!file) return
+            if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+              toast.error('请选择 5 MiB 以内的 JPEG 或 PNG')
+              return
+            }
+            setAvatar(file)
+            setPreview(URL.createObjectURL(file))
+          }}
+        />
+      </label>
       <Button type="submit" disabled={form.formState.isSubmitting}>
         {form.formState.isSubmitting && <LoaderCircle className="animate-spin" />}创建账户
         <ArrowRight />

@@ -21,7 +21,7 @@ export async function createVideo(
   ).videoId
 }
 
-/** 视频响应只代表已提交；实际转码状态需要后端进一步提供。 */
+/** 上传响应只代表当前文件步骤被接收，播放前须查询处理状态。 */
 export function uploadMedia(
   userId: string,
   videoId: string,
@@ -36,4 +36,12 @@ export function uploadMedia(
     body: form,
     signal,
   })
+}
+
+/** 仅发布者读取；收到未知状态时由页面停止推进，不猜测已完成。 */
+export function getUploadStatus(videoId: string, signal?: AbortSignal) {
+  return request<{ status: string; updatedTime: string | null; uploadErrorMsg: string }>(
+    `/video/${positiveId(videoId)}/upload-status`,
+    { signal, cache: 'no-store' },
+  )
 }

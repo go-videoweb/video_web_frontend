@@ -75,7 +75,9 @@ export const initialComments: Comment[] = [
   {
     commentId: '9007199254750001',
     publisherId: '9007199254740995',
-    rootId: '0',
+    rootId: '9007199254750001',
+    parentId: '-1',
+    isUpvoted: false,
     content: '画面和音乐搭配得很舒服，看完忍不住想拿起相机出门了。',
     createdAt: '2026-10-17T09:30:00Z',
     upvoteCount: '24',
@@ -85,7 +87,9 @@ export const initialComments: Comment[] = [
   {
     commentId: '9007199254750002',
     publisherId: demoUserId,
-    rootId: '0',
+    rootId: '9007199254750002',
+    parentId: '-1',
+    isUpvoted: false,
     content: '有时候换一个角度，就能发现熟悉生活里的新东西。',
     createdAt: '2026-10-17T08:00:00Z',
     upvoteCount: '12',
@@ -95,7 +99,9 @@ export const initialComments: Comment[] = [
   {
     commentId: '9007199254750003',
     publisherId: '9007199254740997',
-    rootId: '0',
+    rootId: '9007199254750003',
+    parentId: '-1',
+    isUpvoted: false,
     content: '很喜欢这种安静的叙事，期待下一部作品。',
     createdAt: '2026-10-16T17:00:00Z',
     upvoteCount: '8',

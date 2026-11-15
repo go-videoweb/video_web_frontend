@@ -16,6 +16,11 @@ for (const [url, methods] of Object.entries(schema.paths)) {
   for (const [method, operation] of Object.entries(methods)) {
     if (!operation.operationId) continue
     const id = operation.operationId
+    // 网关 BindQuery 接受 proto 字段名，保留 URL 路径参数与 JSON 字段名。
+    for (const parameter of operation.parameters ?? []) {
+      if (parameter.in === 'query')
+        parameter.name = parameter.name.replace(/[A-Z]/g, (char) => '_' + char.toLowerCase())
+    }
     operations.push({ id, method: method.toUpperCase(), path: url })
     if (/VideoInfo_(GetMpd|GetSegments|GetVideoCover|DownloadVideo)$/.test(id)) {
       const mime = id.endsWith('GetMpd') ? 'application/dash+xml' : 'application/octet-stream'
@@ -45,14 +50,14 @@ for (const [url, methods] of Object.entries(schema.paths)) {
   }
 }
 operations.sort((a, b) => a.id.localeCompare(b.id))
-if (operations.length !== 38)
+if (operations.length !== 49)
   throw new Error(`接口数量变化为 ${operations.length}，请重新审查覆盖清单`)
 const effective = JSON.stringify(schema, null, 2) + '\n'
 const generated = astToString(await openapiTS(schema))
 const manifest =
   JSON.stringify(
     {
-      backendCommit: 'b87a6830',
+      backendCommit: 'ba2604fd',
       sourceSha256: createHash('sha256').update(source).digest('hex'),
       operations,
     },
@@ -69,4 +74,6 @@ for (const [file, content] of [
     if ((await fs.readFile(target, 'utf8')) !== content) throw new Error(`契约产物过期：${file}`)
   } else await fs.writeFile(target, content)
 }
-console.log(`已${process.argv.includes('--check') ? '核对' : '生成'} 38 个 HTTP 操作及前端类型`)
+console.log(
+  `已${process.argv.includes('--check') ? '核对' : '生成'} ${operations.length} 个 HTTP 操作及前端类型`,
+)

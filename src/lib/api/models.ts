@@ -15,7 +15,10 @@ export const videoSummarySchema = z.object({
   coverPath: text,
   description: text,
   duration: text,
-  createdTime: text,
+  createdTime: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ''),
   cntViewed: count,
   cntBarrages: count,
 })
@@ -28,7 +31,10 @@ export const videoDetailSchema = z.object({
   description: text,
   coverPath: text,
   duration: text,
-  createdTime: text,
+  createdTime: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ''),
   classes: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
   records: z
@@ -36,15 +42,39 @@ export const videoDetailSchema = z.object({
     .default({ cntViewed: '0', cntBarrages: '0', cntFavorites: '0', cntShares: '0' }),
 })
 export type VideoDetail = z.infer<typeof videoDetailSchema>
+const relationId = z.string().regex(/^\d+$/)
+const flag = z.union([z.literal(1), z.literal(-1)])
+/** 个人状态单独解码；null 表示此次请求没有可用身份。 */
+export const videoStatusSchema = z.object({
+  isUpvoted: flag,
+  isFavorited: flag,
+  isShared: flag,
+  isThrownShells: flag,
+  favoriteId: relationId,
+  favoriteRecordId: relationId,
+})
 export const commentSchema = z.object({
   commentId: id,
   publisherId: id,
   rootId: text,
+  parentId: text,
   content: text,
-  createdAt: text,
+  createdAt: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ''),
   upvoteCount: count,
   cntReplies: z.number().default(0),
   ipAddress: text,
+  isUpvoted: z.boolean().default(false),
+  reference: z
+    .object({
+      commentId: id,
+      publisherId: z.string(),
+      content: text,
+      unavailable: z.boolean().default(false),
+    })
+    .nullish(),
 })
 export type Comment = z.infer<typeof commentSchema>
 export const userSchema = z.object({

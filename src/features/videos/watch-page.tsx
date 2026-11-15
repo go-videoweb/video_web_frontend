@@ -1,6 +1,6 @@
 import { Link, useParams } from '@tanstack/react-router'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { lazy, Suspense, useCallback, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -32,8 +32,10 @@ import { Dialog } from '@/components/ui/dialog'
 import { EmptyState, ErrorState, Loading } from '@/components/states'
 import { errorMessage } from '@/lib/api/client'
 import { mediaUrl } from '@/lib/api/media'
-import { formatCount, formatDate, playbackTime, publicImage } from '@/lib/utils'
+import { formatCount, formatDate, publicImage } from '@/lib/utils'
 
+import { BarragePanel } from './barrage-panel'
+import { VideoFavoriteControl } from '@/features/favorites/favorite-control'
 const Player = lazy(() =>
   import('@/features/player/player').then((module) => ({ default: module.Player })),
 )
@@ -42,12 +44,18 @@ const Player = lazy(() =>
 export function Watch() {
   const { videoId } = useParams({ from: '/watch/$videoId' })
   const current = useSession()
-  const time = useRef(0)
-  const onTime = useCallback((seconds: number) => {
-    time.current = seconds
-  }, [])
+  return <WatchVideo key={videoId + ':' + (current?.userId ?? 'guest')} videoId={videoId} />
+}
+function WatchVideo({ videoId }: { videoId: string }) {
+  const current = useSession()
+  const client = useQueryClient()
+  const [second, setSecond] = useState(0)
+  const onTime = useCallback((seconds: number) => setSecond(Math.max(0, Math.floor(seconds))), [])
+  const [sharedUrl, setSharedUrl] = useState('')
+  const [uncertainLike, setUncertainLike] = useState(false)
+  const key = ['video', current?.userId || 'guest', videoId] as const
   const query = useQuery({
-    queryKey: ['video', current?.userId || 'guest', videoId],
+    queryKey: key,
     queryFn: ({ signal }) => getVideo(videoId, signal),
     staleTime: Infinity,
     refetchOnMount: false,
@@ -69,29 +77,52 @@ export function Watch() {
   const [color, setColor] = useState('#ffffff')
   const action = useMutation({
     mutationFn: async (kind: 'upvote' | 'shells' | 'share' | 'download' | 'barrage') => {
-      if (kind === 'upvote') return (await interact(videoId, 'upvote')).message || '操作成功'
+      if (kind === 'upvote') {
+        const value = await interact(videoId, 'upvote')
+        client.setQueryData<Awaited<ReturnType<typeof getVideo>>>(key, (old) =>
+          old?.userVideoStatus
+            ? {
+                ...old,
+                userVideoStatus: {
+                  ...old.userVideoStatus,
+                  isUpvoted: old.userVideoStatus.isUpvoted === 1 ? -1 : 1,
+                },
+              }
+            : old,
+        )
+        return value.message || '操作成功'
+      }
       if (kind === 'shells') {
         await interact(videoId, 'throwShells', { shells: shellCount })
         setShells(false)
         return '贝壳已送出'
       }
       if (kind === 'share') {
-        await shareVideo(videoId)
-        await navigator.clipboard.writeText(
-          `${config.siteOrigin.replace(/\/$/, '')}/watch/${videoId}`,
-        )
-        return '分享链接已复制'
+        const { url } = await shareVideo(videoId)
+        setSharedUrl(url)
+        try {
+          await navigator.clipboard.writeText(url)
+          return '分享链接已复制'
+        } catch {
+          return '已生成分享链接'
+        }
       }
       if (kind === 'download') {
         await downloadVideo(videoId)
         return '下载已开始'
       }
-      await sendBarrage(videoId, barrage.trim(), playbackTime(time.current), color)
+      await sendBarrage(videoId, barrage.trim(), second, color)
       setBarrage('')
+      void client.resetQueries({
+        queryKey: ['barrages', current?.userId, videoId, Math.floor(second / 60) * 60],
+      })
       return '弹幕已发送'
     },
     onSuccess: (message) => toast.success(message),
-    onError: (error) => toast.error(errorMessage(error)),
+    onError: (error, kind) => {
+      if (kind === 'upvote') setUncertainLike(true)
+      toast.error(errorMessage(error))
+    },
   })
   if (query.isPending) return <Loading />
   if (query.isError)
@@ -134,7 +165,8 @@ export function Watch() {
               className="barrage-form"
               onSubmit={(event) => {
                 event.preventDefault()
-                if (barrage.trim()) action.mutate('barrage')
+                if (barrage.trim() && Array.from(barrage).length <= 150 && !action.isPending)
+                  action.mutate('barrage')
               }}
             >
               <MessageSquare size={16} />
@@ -143,7 +175,6 @@ export function Watch() {
                 placeholder="发一条友善的弹幕…"
                 value={barrage}
                 onChange={(event) => setBarrage(event.target.value)}
-                maxLength={150}
               />
               <input
                 type="color"
@@ -151,12 +182,17 @@ export function Watch() {
                 value={color}
                 onChange={(event) => setColor(event.target.value)}
               />
-              <Button size="sm" type="submit" disabled={!barrage.trim() || action.isPending}>
+              <Button
+                size="sm"
+                type="submit"
+                disabled={!barrage.trim() || Array.from(barrage).length > 150 || action.isPending}
+              >
                 <Send size={14} />
                 发送
               </Button>
             </form>
           )}
+          {current && <BarragePanel videoId={videoId} userId={current.userId} second={second} />}
           <div className="watch-title">
             {config.demo && (
               <small className="media-credit">
@@ -184,12 +220,27 @@ export function Watch() {
                 <Button
                   variant="outline"
                   onClick={() => action.mutate('upvote')}
-                  disabled={action.isPending}
+                  disabled={action.isPending || uncertainLike || !video.userVideoStatus}
+                  aria-pressed={
+                    video.userVideoStatus ? video.userVideoStatus.isUpvoted === 1 : undefined
+                  }
                   title="点赞或取消点赞"
                 >
                   <ThumbsUp />
-                  点赞
+                  {video.userVideoStatus?.isUpvoted === 1 ? '取消点赞' : '点赞'}
                 </Button>
+                <VideoFavoriteControl videoId={videoId} userId={current.userId} />
+                {(uncertainLike || !video.userVideoStatus) && (
+                  <Button
+                    variant="ghost"
+                    onClick={async () => {
+                      const result = await query.refetch()
+                      if (result.data?.userVideoStatus && !result.isError) setUncertainLike(false)
+                    }}
+                  >
+                    核对个人状态
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => setShells(true)}
@@ -224,6 +275,12 @@ export function Watch() {
               </Button>
             )}
           </div>
+          {sharedUrl && (
+            <label className="form-stack">
+              分享链接
+              <input readOnly value={sharedUrl} onFocus={(event) => event.currentTarget.select()} />
+            </label>
+          )}
           {(video.description || video.tags.length > 0) && (
             <section className="video-description">
               <p>{video.description || '作者暂未填写简介。'}</p>

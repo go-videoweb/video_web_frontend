@@ -3,43 +3,71 @@ import { request } from '@/lib/api/client'
 import { commentSchema } from '@/lib/api/models'
 import { positiveId } from '@/lib/utils'
 
-/** 评论列表按当前服务支持的时间/点赞排序读取。 */
+const cursorSchema = z.object({
+  videoId: z.string(),
+  rootId: z.string(),
+  sortBy: z.string(),
+  order: z.string(),
+  commentId: z.string(),
+  createdAt: z.string().nullish(),
+  upvoteCount: z.string(),
+})
+type Cursor = z.infer<typeof cursorSchema>
+export type CommentSort = 'created_at' | 'cnt_upvote'
+
+function params(sort: CommentSort, order: 'asc' | 'desc', cursor?: Cursor) {
+  const query = new URLSearchParams({ sort_by: sort, order })
+  if (cursor) {
+    for (const [k, v] of Object.entries(cursor))
+      if (v != null) query.set('cursor.' + k.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()), v)
+  }
+  return query
+}
+const page = z.object({ nextCursor: cursorSchema.nullish(), hasMore: z.boolean().default(false) })
+
+/** 主评论使用服务端游标，不把时间戳转换成 Date 以免丢精度。 */
 export async function getComments(
-  videoId: string,
-  page: number,
-  sort: 'created_at' | 'cnt_upvote',
+  id: string,
+  sort: CommentSort,
+  cursor?: Cursor,
   signal?: AbortSignal,
 ) {
-  return z
-    .object({ comments: z.array(commentSchema).default([]), totalCount: z.number().default(0) })
+  return page
+    .extend({ comments: z.array(commentSchema).default([]), totalCount: z.number().default(0) })
+    .parse(
+      await request(`/video/${positiveId(id)}/comment?${params(sort, 'desc', cursor)}`, { signal }),
+    )
+}
+
+/** 回复以主评论为根读取整个楼层。 */
+export async function getReplies(
+  id: string,
+  rootId: string,
+  cursor?: Cursor,
+  signal?: AbortSignal,
+) {
+  return page
+    .extend({ replies: z.array(commentSchema).default([]) })
     .parse(
       await request(
-        `/video/${positiveId(videoId)}/comment?${new URLSearchParams({ page_num: String(page), page_size: '10', sort_by: sort, order: 'desc' })}`,
+        `/video/${positiveId(id)}/comments/${positiveId(rootId)}/replies?${params('created_at', 'asc', cursor)}`,
         { signal },
       ),
     )
 }
-/** 回复由展开动作触发，不为每条评论预加载。 */
-export async function getReplies(videoId: string, commentId: string, page = 1) {
-  return z
-    .object({ replies: z.array(commentSchema).default([]) })
-    .parse(
-      await request(
-        `/video/${positiveId(videoId)}/comments/${positiveId(commentId)}/replies?${new URLSearchParams({ page_num: String(page), page_size: '10', sort_by: 'created_at', order: 'asc' })}`,
-      ),
-    ).replies
-}
-/** 根评论 parentId=0；提交失败时由组件保留草稿。 */
-export function postComment(videoId: string, content: string, parentId = '0') {
-  return request<{ commentId: string }>(`/video/${positiveId(videoId)}/comment`, {
+
+/** 主评论 parentId=-1；楼内回复使用直接回复对象的 ID。 */
+export function postComment(id: string, content: string, parentId = '-1') {
+  return request<{ commentId: string }>(`/video/${positiveId(id)}/comment`, {
     method: 'POST',
     body: { content, parentId },
   })
 }
-/** 点赞方向由后端当前状态决定，避免依赖不可靠的前端默认值。 */
-export function upvoteComment(videoId: string, commentId: string) {
-  return request<{ message?: string }>(
-    `/video/${positiveId(videoId)}/comment/${positiveId(commentId)}/upvote`,
-    { method: 'PUT', body: {} },
+
+/** 显式提交目标状态，响应中的布尔值和计数是真值。 */
+export function upvoteComment(id: string, commentId: string, liked: boolean) {
+  return request<{ isUpvoted: boolean; upvoteCount: string }>(
+    `/video/${positiveId(id)}/comment/${positiveId(commentId)}/upvote`,
+    { method: 'PUT', body: { liked } },
   )
 }
