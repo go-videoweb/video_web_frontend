@@ -2,6 +2,10 @@ import { http, HttpResponse, delay } from 'msw'
 import { demoVideos, demoDetail, demoUser, demoUserId, initialComments } from './fixtures'
 import type { Comment } from '@/lib/api/models'
 
+import { demoFavoriteState, socialHandlers } from './social'
+import type { Barrage } from '@/features/videos/api'
+const barrages = new Map<string, Barrage[]>()
+let barrageId = 9007199254910000n
 const base = '*/api/v1'
 const comments = new Map<string, Comment[]>()
 const replies = new Map<string, Comment[]>()
@@ -24,6 +28,7 @@ const list = (id: string) => {
         ...initialComments[1]!,
         commentId: '9007199254760001',
         rootId: initialComments[0]!.commentId,
+        parentId: initialComments[0]!.commentId,
         content: '谢谢喜欢，也期待看到你的作品。',
         cntReplies: 0,
       },
@@ -32,8 +37,41 @@ const list = (id: string) => {
   return comments.get(id)!
 }
 
+function commentPage(
+  items: Comment[],
+  url: URL,
+  videoId: string,
+  rootId: string,
+  order: string,
+  key: 'comments' | 'replies',
+) {
+  const sortBy = url.searchParams.get('sort_by') ?? 'created_at'
+  const after = url.searchParams.get('cursor.comment_id')
+  const unread = items.slice(after ? items.findIndex((item) => item.commentId === after) + 1 : 0)
+  const batch = unread.slice(0, 30)
+  const last = batch.at(-1)
+  const hasMore = unread.length > 30
+  return {
+    [key]: batch,
+    hasMore,
+    nextCursor:
+      hasMore && last
+        ? {
+            videoId,
+            rootId,
+            sortBy,
+            order,
+            commentId: last.commentId,
+            createdAt: last.createdAt,
+            upvoteCount: last.upvoteCount,
+          }
+        : null,
+  }
+}
+
 /** MSW 仅在显式演示模式或测试中启动，不代理不存在的服务端能力。 */
 export const handlers = [
+  ...socialHandlers,
   http.post(`${base}/user/login`, async ({ request }) => {
     const body = (await request.json()) as { username?: string; password?: string }
     await delay(120)
@@ -50,11 +88,20 @@ export const handlers = [
     return HttpResponse.json({
       statusCode: 200,
       msg: 'success',
-      data: { accessToken: 'registration-only', refreshToken: 'registration-only' },
+      data: { userId: demoUserId, accessToken: 'demo-access', refreshToken: 'demo-refresh' },
     })
   }),
   http.post(`${base}/user/:userId/logout`, () => ok()),
-  http.get(`${base}/captcha/codeCaptcha`, () => ok('验证码已发送')),
+  http.get(`${base}/captcha/codeCaptcha`, ({ request }) =>
+    ['register', 'change_email', 'reset_password'].includes(
+      new URL(request.url).searchParams.get('purpose') ?? '',
+    )
+      ? ok('已申请发信')
+      : failure(400, '缺少验证码用途'),
+  ),
+  http.post(`${base}/userinfo/forgetPassword`, () =>
+    HttpResponse.json({ common: { status: 200, message: '密码已更新' } }),
+  ),
   http.get(`${base}/video/list`, async ({ request }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     await delay(80)
@@ -70,11 +117,24 @@ export const handlers = [
         ),
     })
   }),
-  http.get(`${base}/video/:videoId/info`, async ({ params }) => {
+  http.get(`${base}/video/:videoId/info`, async ({ params, request }) => {
     await delay(70)
     const video = demoVideos.find((v) => v.videoId === params.videoId)
     return video
-      ? HttpResponse.json({ videoDetail: demoDetail(video) })
+      ? HttpResponse.json({
+          videoDetail: demoDetail(video),
+          userVideoStatus: authorized(request)
+            ? {
+                isUpvoted: liked.has(`${params.videoId}:upvote`) ? 1 : -1,
+                isFavorited: demoFavoriteState(String(params.videoId)) ? 1 : -1,
+                isShared: liked.has(`${params.videoId}:share`) ? 1 : -1,
+                isThrownShells: -1,
+                favoriteId: '0',
+                favoriteRecordId: '0',
+                ...demoFavoriteState(String(params.videoId)),
+              }
+            : null,
+        })
       : HttpResponse.json(
           { code: 404, reason: 'NOT_FOUND', message: '视频不存在' },
           { status: 404 },
@@ -133,21 +193,25 @@ export const handlers = [
     if (params.action === 'modifyEmail') profile.email = body.email || profile.email
     return ok()
   }),
-  http.put(`${base}/:userId/profile/avatar`, ({ request }) =>
-    authorized(request) ? ok() : failure(3003, '请先登录'),
-  ),
-  http.post(`${base}/user/profile/avatar`, () =>
-    HttpResponse.json({ filePath: '/unmapped/demo-avatar.png' }),
-  ),
+  http.get(`${base}/users/:userId/avatar`, () => HttpResponse.redirect('/assets/forest.jpg')),
+  http.put(`${base}/user/profile/avatar`, async ({ request }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    if (!(await request.formData()).has('avatar')) return failure(400, '缺少头像')
+    profile.avatarPath = `/api/v1/users/${demoUserId}/avatar`
+    return HttpResponse.json({
+      statusCode: 200,
+      message: '头像已更新',
+      avatarUrl: profile.avatarPath,
+    })
+  }),
   http.get(`${base}/video/:videoId/comment`, ({ request, params }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     const url = new URL(request.url)
-    const page = Number(url.searchParams.get('page_num') || '1')
     const values = [...list(String(params.videoId))]
     if (url.searchParams.get('sort_by') === 'cnt_upvote')
       values.sort((a, b) => Number(BigInt(b.upvoteCount) - BigInt(a.upvoteCount)))
     return HttpResponse.json({
-      comments: values.slice((page - 1) * 10, page * 10),
+      ...commentPage(values, url, String(params.videoId), '0', 'desc', 'comments'),
       totalCount: values.length,
     })
   }),
@@ -159,24 +223,38 @@ export const handlers = [
     const comment: Comment = {
       commentId,
       publisherId: demoUserId,
-      rootId: '0',
+      rootId: commentId,
+      parentId: body.parentId,
+      isUpvoted: false,
       content: body.content,
       createdAt: new Date().toISOString(),
       upvoteCount: '0',
       cntReplies: 0,
       ipAddress: '',
     }
-    if (body.parentId === '0') roots.unshift(comment)
+    if (body.parentId === '-1') roots.unshift(comment)
     else {
       const parent =
         roots.find((item) => item.commentId === body.parentId) ||
         [...replies.values()].flat().find((item) => item.commentId === body.parentId)
-      const rootId = parent?.rootId === '0' ? parent.commentId : parent?.rootId
+      const rootId = parent?.rootId
       const root = roots.find((item) => item.commentId === rootId)
       if (!root) return failure(404, '评论不存在')
       const key = `${params.videoId}:${root.commentId}`
       const values = replies.get(key) || []
-      values.push({ ...comment, rootId: root.commentId })
+      values.push({
+        ...comment,
+        rootId: root.commentId,
+        reference:
+          parent && parent.commentId !== root.commentId
+            ? {
+                commentId: parent.commentId,
+                publisherId: parent.publisherId,
+                content: parent.content,
+                unavailable: false,
+              }
+            : null,
+      })
       replies.set(key, values)
       root.cntReplies++
     }
@@ -185,34 +263,46 @@ export const handlers = [
   http.get(`${base}/video/:videoId/comments/:commentId/replies`, ({ request, params }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     list(String(params.videoId))
-    const page = Number(new URL(request.url).searchParams.get('page_num') || '1')
-    return HttpResponse.json({
-      replies: (replies.get(`${params.videoId}:${params.commentId}`) || []).slice(
-        (page - 1) * 10,
-        page * 10,
+    return HttpResponse.json(
+      commentPage(
+        replies.get(`${params.videoId}:${params.commentId}`) ?? [],
+        new URL(request.url),
+        String(params.videoId),
+        String(params.commentId),
+        'asc',
+        'replies',
       ),
-    })
+    )
   }),
-  http.put(`${base}/video/:videoId/comment/:commentId/upvote`, ({ request, params }) => {
+  http.put(`${base}/video/:videoId/comment/:commentId/upvote`, async ({ request, params }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     const key = String(params.commentId)
-    const already = liked.has(key)
-    if (already) liked.delete(key)
-    else liked.add(key)
+    const { liked: desired } = (await request.json()) as { liked?: boolean }
+    if (typeof desired !== 'boolean') return failure(400, '缺少 liked')
     const comment =
       list(String(params.videoId)).find((v) => v.commentId === key) ||
       [...replies.entries()]
         .filter(([id]) => id.startsWith(`${params.videoId}:`))
         .flatMap(([, values]) => values)
         .find((v) => v.commentId === key)
-    if (comment) comment.upvoteCount = String(BigInt(comment.upvoteCount) + (already ? -1n : 1n))
-    return ok(already ? '已取消点赞' : '评论点赞成功')
+    if (!comment) return failure(404, '评论不存在')
+    if (comment.isUpvoted !== desired)
+      comment.upvoteCount = String(BigInt(comment.upvoteCount) + (desired ? 1n : -1n))
+    comment.isUpvoted = desired
+    return HttpResponse.json({
+      statusCode: 200,
+      isUpvoted: desired,
+      upvoteCount: comment.upvoteCount,
+    })
   }),
-  http.get(`${base}/video/interaction/:videoId/share`, ({ request, params }) =>
-    authorized(request)
-      ? HttpResponse.json({ statusCode: 200, url: `http://127.0.0.1:8080/video/${params.videoId}` })
-      : failure(3003, '请先登录'),
-  ),
+  http.get(`${base}/video/interaction/:videoId/share`, ({ request, params }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    liked.add(`${params.videoId}:share`)
+    return HttpResponse.json({
+      statusCode: 200,
+      url: new URL(`/watch/${params.videoId}`, request.url).href,
+    })
+  }),
   http.put(`${base}/video/interaction/:videoId/:action`, ({ request, params }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     const key = `${params.videoId}:${params.action}`
@@ -221,9 +311,60 @@ export const handlers = [
     else liked.add(key)
     return ok(params.action === 'upvote' ? (already ? '已取消点赞' : '视频点赞成功') : '操作成功')
   }),
-  http.post(`${base}/video/interaction/:videoId/barrage/send`, ({ request }) =>
-    authorized(request) ? ok('弹幕已发送') : failure(3003, '请先登录'),
-  ),
+  http.get(`${base}/video/:videoId/barrages`, ({ request, params }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    const q = new URL(request.url).searchParams
+    const startSecond = Number(q.get('start_second'))
+    const endSecond = Number(q.get('end_second'))
+    const cursor = q.get('cursor.barrage_id')
+    const rows = (barrages.get(String(params.videoId)) ?? [])
+      .filter((i) => i.positionSecond >= startSecond && i.positionSecond < endSecond)
+      .sort((a, b) => a.positionSecond - b.positionSecond || a.barrageId.localeCompare(b.barrageId))
+    const unread = rows.slice(cursor ? rows.findIndex((i) => i.barrageId === cursor) + 1 : 0)
+    const batch = unread.slice(0, 500)
+    const last = batch.at(-1)
+    const hasMore = unread.length > 500
+    return HttpResponse.json({
+      barrages: batch,
+      hasMore,
+      nextCursor:
+        hasMore && last
+          ? {
+              videoId: String(params.videoId),
+              startSecond,
+              endSecond,
+              positionSecond: last.positionSecond,
+              barrageId: last.barrageId,
+            }
+          : null,
+    })
+  }),
+  http.post(`${base}/video/interaction/:videoId/barrage/send`, async ({ request, params }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    const data = (await request.json()) as Pick<Barrage, 'positionSecond' | 'content' | 'color'>
+    if (!Number.isInteger(data.positionSecond) || data.positionSecond < 0)
+      return failure(400, '弹幕位置无效')
+    const id = String(params.videoId)
+    barrages.set(id, [
+      ...(barrages.get(id) ?? []),
+      { ...data, barrageId: String(++barrageId), isUpvoted: false, upvoteCount: '0' },
+    ])
+    return ok('弹幕已发送')
+  }),
+  http.put(`${base}/video/interaction/:videoId/barrage/upvote`, async ({ request, params }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    const data = (await request.json()) as { liked: boolean; barrageId: string }
+    const item = barrages.get(String(params.videoId))?.find((i) => i.barrageId === data.barrageId)
+    if (!item || typeof data.liked !== 'boolean') return failure(400, '弹幕或目标状态无效')
+    if (item.isUpvoted !== data.liked)
+      item.upvoteCount = String(BigInt(item.upvoteCount) + (data.liked ? 1n : -1n))
+    item.isUpvoted = data.liked
+    return HttpResponse.json({
+      statusCode: 200,
+      isUpvoted: item.isUpvoted,
+      upvoteCount: item.upvoteCount,
+    })
+  }),
   http.post(`${base}/:userId/video/metaInfo`, async ({ request }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
     const body = (await request.json()) as {
@@ -239,12 +380,31 @@ export const handlers = [
       createdTime: new Date().toISOString(),
       cntViewed: '0',
     })
+    sessionStorage.setItem('vw.demo.upload.' + videoId, 'waiting_cover')
     return HttpResponse.json({ resp: { statusCode: 200 }, videoId })
   }),
-  http.post(`${base}/:userId/video/:videoId/:kind`, async ({ request }) => {
+  http.get(`${base}/video/:videoId/upload-status`, ({ params, request }) => {
     if (!authorized(request)) return failure(3003, '请先登录')
-    await request.formData()
+    const key = 'vw.demo.upload.' + params.videoId
+    const stage = sessionStorage.getItem(key)
+    if (!stage) return failure(404, '找不到上传状态')
+    const status = stage.startsWith('processing:')
+      ? Date.now() - Number(stage.split(':')[1]) > 1000
+        ? 'completed'
+        : 'processing'
+      : stage
+    return HttpResponse.json({ status, updatedTime: null, uploadErrorMsg: '' })
+  }),
+  http.post(`${base}/:userId/video/:videoId/:kind`, async ({ request, params }) => {
+    if (!authorized(request)) return failure(3003, '请先登录')
+    const key = 'vw.demo.upload.' + params.videoId
+    const cover = params.kind === 'cover'
+    const stage = sessionStorage.getItem(key)
+    if (stage !== (cover ? 'waiting_cover' : 'waiting_video'))
+      return failure(409, '当前阶段不能上传该文件')
+    if (!(await request.formData()).has(cover ? 'cover' : 'file')) return failure(400, '缺少文件')
     await delay(200)
+    sessionStorage.setItem(key, cover ? 'waiting_video' : 'processing:' + Date.now())
     return HttpResponse.json({ resp: { statusCode: 200, message: '已提交处理' } })
   }),
   http.all(`${base}/*`, () => failure(501, '当前演示不提供此接口')),

@@ -2,6 +2,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarDays, Film, Settings, Users } from 'lucide-react'
 import { useSession } from '@/features/auth/session'
+import { FollowControl } from './follow-control'
 import { getUser } from '@/features/users/api'
 import { Avatar } from '@/components/layout/shell'
 import { ErrorState, Loading, LoginRequired } from '@/components/states'
@@ -40,6 +41,9 @@ export function UserPage() {
           <h1>{user.userName || 'VideoWeb 用户'}</h1>
           <p>{user.signature || '这里还没有留下签名。'}</p>
         </div>
+        {current.userId !== userId && (
+          <FollowControl key={userId} userId={current.userId} target={userId} />
+        )}
         {current.userId === userId && (
           <Button variant="outline" asChild>
             <Link to="/settings">

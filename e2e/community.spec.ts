@@ -85,7 +85,7 @@ test('真实 DASH 播放、可见画面与评论互动', async ({ page }, testIn
   await posted.getByRole('button', { name: '回复', exact: true }).click()
   await posted.getByLabel('回复评论').fill('这是一条可回读的测试回复')
   await posted.getByRole('button', { name: '发布回复', exact: true }).click()
-  await expect(posted.getByText('这是一条可回读的测试回复', { exact: true })).toBeVisible()
+  await expect(page.getByText('这是一条可回读的测试回复', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: '点赞', exact: true }).click()
   await expect(page.getByText('视频点赞成功', { exact: true })).toBeVisible()
   await page.evaluate(() => {
@@ -117,18 +117,17 @@ test('账户更新与投稿恢复不重复创建元信息', async ({ page }, tes
   await page.getByRole('button', { name: '保存并继续' }).click()
   await expect(page.getByRole('heading', { name: '浏览器验证投稿' })).toBeVisible()
   const files = page.locator('.upload-drop input[type=file]')
-  await files.nth(0).setInputFiles(path.resolve('public/assets/sintel-trailer.mp4'))
-  await page.getByRole('button', { name: '提交视频', exact: true }).click()
-  await expect(page.getByRole('button', { name: '已提交处理' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '提交视频', exact: true })).toBeDisabled()
+  await files.nth(0).setInputFiles(path.resolve('public/assets/mountains.jpg'))
+  await page.getByRole('button', { name: '上传封面', exact: true }).click()
+  await expect(page.getByText('等待原片', { exact: true })).toBeVisible()
   await page.reload()
   await expect(page.getByRole('heading', { name: '浏览器验证投稿' })).toBeVisible()
-  await expect(page.getByRole('button', { name: '已提交处理' })).toBeDisabled()
-  await page
-    .locator('.upload-drop input[type=file]')
-    .nth(1)
-    .setInputFiles(path.resolve('public/assets/mountains.jpg'))
-  await page.getByRole('button', { name: '上传封面', exact: true }).click()
   await expect(page.getByRole('button', { name: '封面已上传' })).toBeDisabled()
+  await files.nth(1).setInputFiles(path.resolve('public/assets/sintel-trailer.mp4'))
+  await page.getByRole('button', { name: '提交视频', exact: true }).click()
+  await expect(page.getByText('正在生成 DASH', { exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '查看视频' })).toBeVisible()
   expect(creations).toBe(1)
   await page.screenshot({
     path: `.cache/screenshots/upload-${testInfo.project.name}.png`,
@@ -144,6 +143,89 @@ test('真实模式保持未登录状态，不以模拟数据掩盖不可用 API'
   await page.goto('/login')
   await page.getByRole('button', { name: '登录', exact: true }).click()
   await expect(page.getByText('请输入用户名', { exact: true })).toBeVisible()
+})
+
+test('收藏关系使用服务端记录 ID，关注可移动及取消', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '跨页业务覆盖使用桌面项目')
+  await page.goto('/?mode=demo')
+  await page.locator('.video-card').first().getByRole('link').click()
+  await page.getByRole('button', { name: '收藏', exact: true }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('收藏夹').selectOption('9007199254770001')
+  await dialog.getByRole('button', { name: '确认', exact: true }).click()
+  await expect(page.getByRole('button', { name: '已收藏', exact: true })).toBeVisible()
+  await page.getByRole('link', { name: '收藏夹', exact: true }).click()
+  await expect(page.locator('.video-card')).toHaveCount(1)
+  await page.locator('.video-card').first().getByRole('link').click()
+  await page.getByRole('button', { name: '已收藏', exact: true }).click()
+  const cancel = page.waitForRequest(
+    (request) => request.method() === 'PUT' && request.url().endsWith('/favorite'),
+  )
+  await dialog.getByRole('button', { name: '确认', exact: true }).click()
+  expect((await cancel).postDataJSON()).toMatchObject({
+    favorite: -1,
+    favoriteRecordId: expect.stringMatching(/^[1-9]\d+$/),
+  })
+  await expect(page.getByRole('button', { name: '收藏', exact: true })).toBeVisible()
+
+  await page.getByRole('link', { name: '关注', exact: true }).click()
+  await page.getByRole('button', { name: '新建关注组', exact: true }).click()
+  await dialog.getByLabel('名称').fill('朋友')
+  await dialog.getByRole('button', { name: '保存', exact: true }).click()
+  await expect(page.getByLabel('关注组', { exact: true }).locator('option:checked')).toHaveText(
+    '朋友',
+  )
+  await page.getByRole('link', { name: '发现', exact: true }).click()
+  await page.locator('.video-card').nth(1).getByRole('link').click()
+  await page.locator('.creator-name').click()
+  await page.getByRole('button', { name: '关注', exact: true }).click()
+  await dialog.getByRole('button', { name: '确认关注' }).click()
+  await page.getByRole('button', { name: '已关注', exact: true }).click()
+  await dialog.getByLabel('关注组').selectOption({ label: '朋友' })
+  await dialog.getByRole('button', { name: '移动到此组' }).click()
+  await page.getByRole('button', { name: '已关注', exact: true }).click()
+  await expect(dialog.getByLabel('关注组').locator('option:checked')).toHaveText('朋友')
+  await dialog.getByRole('button', { name: '取消关注' }).click()
+  await expect(page.getByRole('button', { name: '关注', exact: true })).toBeVisible()
+})
+
+test('评论与零秒弹幕使用明确点赞状态，找回密码不发送凭据', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '跨页业务覆盖使用桌面项目')
+  await page.goto('/?mode=demo')
+  await page.locator('.video-card').first().getByRole('link').click()
+  await page.getByLabel('发送弹幕').fill('零秒弹幕')
+  const send = page.waitForRequest((request) => request.url().endsWith('/barrage/send'))
+  await page.getByRole('button', { name: '发送', exact: true }).click()
+  expect((await send).postDataJSON()).toMatchObject({ positionSecond: 0 })
+  const barrage = page.getByRole('region', { name: '当前区间弹幕' })
+  await expect(barrage.locator('li').getByText('零秒弹幕')).toBeVisible()
+  await barrage.getByRole('button', { name: '点赞弹幕', exact: true }).click()
+  await expect(barrage.getByRole('button', { name: '取消点赞弹幕' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  const comment = page.locator('.comment-item').first()
+  await comment.getByRole('button', { name: '点赞评论', exact: true }).click()
+  await expect(comment.getByRole('button', { name: '取消点赞评论' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await comment.getByRole('button', { name: '取消点赞评论' }).click()
+  await expect(comment.getByRole('button', { name: '点赞评论' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
+  await page.goto('/forgot-password')
+  await page.getByLabel('邮箱', { exact: true }).fill('DEMO@example.test')
+  const captcha = page.waitForRequest((request) => request.url().includes('/captcha/codeCaptcha?'))
+  await page.getByRole('button', { name: '获取验证码' }).click()
+  expect(new URL((await captcha).url()).searchParams.get('purpose')).toBe('reset_password')
+  await page.getByLabel('验证码', { exact: true }).fill('012345')
+  await page.getByLabel('新密码', { exact: true }).fill('test-password')
+  const reset = page.waitForRequest((request) => request.url().endsWith('/userinfo/forgetPassword'))
+  await page.getByRole('button', { name: '重置密码' }).click()
+  expect((await reset).headers().authorization).toBeUndefined()
+  await expect(page.getByText('密码已更新，请重新登录。')).toBeVisible()
 })
 
 test('系统主题、媒体失败重试、路由清理与游客访问', async ({ page }, testInfo) => {

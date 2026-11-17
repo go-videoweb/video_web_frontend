@@ -87,8 +87,25 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put: operations["FileService_UpdateAvatar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{userId}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description 公开读取头像二进制；用户不存在返回 404，头像文件缺失时回退共享默认头像。 */
+        get: operations["FileService_GetAvatar"];
         put?: never;
-        post: operations["FileService_UploadAvatar"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -143,7 +160,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/userinfo/{userId}/forgetPassword": {
+    "/api/v1/userinfo/forgetPassword": {
         parameters: {
             query?: never;
             header?: never;
@@ -399,6 +416,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/video/{videoId}/upload-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description 发布者查询视频的上传和处理进度。业务失败通过响应体的 code、reason 和 message 返回。 */
+        get: operations["VideoInfo_GetVideoUploadStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/{userId}/follow": {
         parameters: {
             query?: never;
@@ -431,22 +465,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/{userId}/profile/avatar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["FileService_UpdateAvatar"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/{userId}/video/metaInfo": {
         parameters: {
             query?: never;
@@ -456,12 +474,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * @description Request Order: 1. UploadVideoInfo 2. UploadVideoFile 3. UploadVideoCover
-         *      1(UploadVideoInfo) Will Create a new directory for the video,
-         *      2(UploadVideoFile) and 3(UploadVideoCover) will upload the video file and cover file to the directory.
-         *      The order of 2 and 3 is not important.
-         */
+        /** @description 投稿顺序为上传视频元信息、封面、原片。 */
         post: operations["VideoInfo_UploadVideoInfo"];
         delete?: never;
         options?: never;
@@ -526,7 +539,154 @@ export interface paths {
         };
         get: operations["VideoInfo_DownloadVideo"];
         put?: never;
+        /** @description 原片落盘后返回，视频服务随后在后台生成 DASH。 */
         post: operations["VideoInfo_UploadVideoFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/favorites/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description 获取当前登录用户的全部收藏夹，包含公开和私密收藏夹。 */
+        get: operations["Favorite_GetFavoritesList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/favorites/{favoritesId}/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description 登录后分页读取本人收藏夹或其他用户的公开收藏夹。 */
+        get: operations["VideoInfo_GetFavoriteVideos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/follow-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Follow_GetFollowLists"];
+        put?: never;
+        post: operations["Follow_CreateFollowList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/follow-lists/batch-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Follow_DeleteFollowLists"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/follow-lists/{followListId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["Follow_ModifyFollowList"];
+        trace?: never;
+    };
+    "/api/v1/follow-lists/{followListId}/default": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["Follow_SetDefaultFollowList"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/follow/relations/{targetUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Follow_GetFollowRelation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/follow/relations/{targetUserId}/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["Follow_MoveFollowee"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/video/{videoId}/barrages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["VideoInteract_GetBarrages"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -541,7 +701,6 @@ export interface components {
             /** Format: int32 */
             statusCode?: number;
             msg?: string;
-            code?: string;
         };
         "gateway.api.v1.user.captcha.GetImageCaptchaResp": {
             /** Format: int32 */
@@ -559,12 +718,15 @@ export interface components {
             /** Format: int32 */
             isPrivate?: number;
             description?: string;
+            /** @description 保留兼容字段；实际创建者以网关鉴权上下文为准。 */
             userId?: string;
         };
         "gateway.api.v1.user.favorites.CreateFavoritesResp": {
             /** Format: int32 */
             statusCode?: number;
             msg?: string;
+            /** @description 数据库保存成功后的收藏夹 ID。 */
+            favoriteId?: string;
         };
         "gateway.api.v1.user.favorites.DeleteFavoritesResp": {
             /** Format: int32 */
@@ -583,19 +745,16 @@ export interface components {
             statusCode?: number;
             msg?: string;
         };
-        "gateway.api.v1.user.file.UpdateAvatarReq": {
-            userId?: string;
-        };
         "gateway.api.v1.user.file.UpdateAvatarResp": {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
-        };
-        "gateway.api.v1.user.file.UploadAvatarResp": {
-            filePath?: string;
+            /** @description 浏览器可访问的 API 相对地址，不是磁盘路径。 */
+            avatarUrl?: string;
         };
         "gateway.api.v1.user.follow.FollowUserReq": {
             userId?: string;
+            /** @description 旧字段名，实际表示被关注的目标用户，不是操作人。 */
             followerUserId?: string;
             followListId?: string;
         };
@@ -603,15 +762,23 @@ export interface components {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
+            isFollowing?: boolean;
+            followListId?: string;
         };
         "gateway.api.v1.user.follow.GetFolloweeInfoResp": {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
             followeeInfo?: components["schemas"]["gateway.api.v1.user.follow.GetFolloweeInfoResp_UserSummary"][];
+            total?: string;
+            /** Format: int32 */
+            pageNum?: number;
+            /** Format: int32 */
+            pageSize?: number;
         };
         "gateway.api.v1.user.follow.GetFolloweeInfoResp_UserSummary": {
             username?: string;
+            /** @description 头像 API 相对 URL，保留原字段名，不再返回服务器路径。 */
             avatarPath?: string;
             /** Format: int32 */
             gender?: number;
@@ -619,6 +786,9 @@ export interface components {
             email?: string;
             /** Format: date-time */
             birthday?: string;
+            /** @description 被关注用户的 ID，用于用户主页跳转和关注关系操作。 */
+            userId?: string;
+            followListId?: string;
         };
         "gateway.api.v1.user.follow.UnfollowUserReq": {
             userId?: string;
@@ -680,6 +850,8 @@ export interface components {
         "gateway.api.v1.user.id.RegisterResp_Data": {
             accessToken?: string;
             refreshToken?: string;
+            /** @description 注册成功创建的用户 ID，与 access token 中身份一致。 */
+            userId?: string;
         };
         "gateway.api.v1.user.userinfo.CommonResp": {
             /** Format: int32 */
@@ -687,7 +859,6 @@ export interface components {
             message?: string;
         };
         "gateway.api.v1.user.userinfo.ForgetPasswordReq": {
-            userId?: string;
             email?: string;
             newPassword?: string;
             inputCode?: string;
@@ -740,6 +911,7 @@ export interface components {
             cntFollows?: number;
             /** Format: int32 */
             cntVideos?: number;
+            /** @description 头像 API 相对 URL，保留原字段名，不再返回服务器路径。 */
             avatarPath?: string;
             /** Format: int32 */
             gender?: number;
@@ -748,6 +920,26 @@ export interface components {
         "gateway.api.v1.user.userinfo.UserinfoResp": {
             userInfo?: components["schemas"]["gateway.api.v1.user.userinfo.UserInfo"];
             common?: components["schemas"]["gateway.api.v1.user.userinfo.CommonResp"];
+        };
+        /** @description CommentCursor 保存上一批最后一条评论的位置，不能跨视频、楼层或排序复用。 */
+        "gateway.api.v1.video.comment.CommentCursor": {
+            /** @description 所属视频 ID，必须与本次请求一致。 */
+            videoId?: string;
+            /** @description 主评论列表为 0，回复列表为所属主评论 ID。 */
+            rootId?: string;
+            /** @description 排序字段：created_at 或 cnt_upvote。 */
+            sortBy?: string;
+            /** @description 排序方向：asc 或 desc；热度排序只允许 desc。 */
+            order?: string;
+            /** @description 上一批最后一条已返回评论的 ID，用于同值排序。 */
+            commentId?: string;
+            /**
+             * Format: date-time
+             * @description 该评论的创建时间；按时间排序时必须提供。
+             */
+            createdAt?: string;
+            /** @description 该评论在读取时的点赞数；不是固定的热度快照。 */
+            upvoteCount?: string;
         };
         "gateway.api.v1.video.comment.CommentInfo": {
             commentId?: string;
@@ -760,6 +952,9 @@ export interface components {
             ipAddress?: string;
             /** Format: uint32 */
             cntReplies?: number;
+            parentId?: string;
+            isUpvoted?: boolean;
+            reference?: components["schemas"]["gateway.api.v1.video.comment.CommentReference"];
         };
         "gateway.api.v1.video.comment.CommentVideoReq": {
             videoId?: string;
@@ -773,39 +968,53 @@ export interface components {
             comments?: components["schemas"]["gateway.api.v1.video.comment.CommentInfo"][];
             /** Format: int32 */
             totalCount?: number;
+            /** @description 仅有下一批时返回，否则为空。 */
+            nextCursor?: components["schemas"]["gateway.api.v1.video.comment.CommentCursor"];
+            hasMore?: boolean;
         };
         "gateway.api.v1.video.comment.GetCommentRepliesResp": {
             replies?: components["schemas"]["gateway.api.v1.video.comment.CommentInfo"][];
+            /** @description 仅有下一批时返回，否则为空。 */
+            nextCursor?: components["schemas"]["gateway.api.v1.video.comment.CommentCursor"];
+            hasMore?: boolean;
         };
         "gateway.api.v1.video.comment.UpvoteCommentReq": {
             commentId?: string;
             videoId?: string;
-            /**
-             * @description If is_upvote is true, the user has upvoted the comment before, so we need to cancel the upvote.
-             *      Otherwise, the user has not upvoted the comment before, so we need to add the upvote.
-             */
-            isUpvote?: boolean;
+            liked?: boolean;
         };
         "gateway.api.v1.video.comment.UpvoteCommentResp": {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
+            isUpvoted?: boolean;
+            upvoteCount?: string;
         };
         "gateway.api.v1.video.interact.VideoFavoriteReq": {
             videoId?: string;
             favoriteId?: string;
+            /**
+             * Format: int32
+             * @description 1 表示收藏，-1 表示取消；不再根据当前状态自动切换。
+             */
+            favorite?: number;
+            /** @description 取消时必须携带当前收藏记录 ID，收藏时必须为 0。 */
+            favoriteRecordId?: string;
         };
         "gateway.api.v1.video.interact.VideoFavoriteResp": {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
+            isFavorited?: boolean;
+            favoriteId?: string;
+            favoriteRecordId?: string;
         };
         "gateway.api.v1.video.interact.VideoSendBarrageReq": {
             videoId?: string;
             content?: string;
             color?: string;
-            time?: string;
-            upvoteCount?: string;
+            /** Format: int32 */
+            positionSecond?: number;
         };
         "gateway.api.v1.video.interact.VideoSendBarrageResp": {
             /** Format: int32 */
@@ -831,11 +1040,14 @@ export interface components {
         "gateway.api.v1.video.interact.VideoUpvoteBarrageReq": {
             videoId?: string;
             barrageId?: string;
+            liked?: boolean;
         };
         "gateway.api.v1.video.interact.VideoUpvoteBarrageResp": {
             /** Format: int32 */
             statusCode?: number;
             message?: string;
+            isUpvoted?: boolean;
+            upvoteCount?: string;
         };
         "gateway.api.v1.video.interact.VideoUpvoteReq": {
             videoId?: string;
@@ -862,6 +1074,8 @@ export interface components {
         };
         "gateway.api.v1.video.videoinfo.GetVideoInfoResp": {
             videoDetail?: components["schemas"]["gateway.api.v1.video.videoinfo.VideoMetaInfo"];
+            /** @description 游客不返回个人状态；身份仅由鉴权上下文确定。 */
+            userVideoStatus?: components["schemas"]["gateway.api.v1.video.videoinfo.UserVideoStatus"];
         };
         "gateway.api.v1.video.videoinfo.GetVideoListResp": {
             VideoSummary?: components["schemas"]["gateway.api.v1.video.videoinfo.VideoSummary"][];
@@ -927,6 +1141,143 @@ export interface components {
             /** Format: date-time */
             createdTime?: string;
         };
+        "gateway.api.v1.user.favorites.FavoriteDetail": {
+            favoriteId?: string;
+            favoriteName?: string;
+            description?: string;
+            /** @description true 表示私密，对应数据库 is_private=-1；false 表示公开。 */
+            isPrivate?: boolean;
+        };
+        "gateway.api.v1.user.favorites.GetFavoritesListResp": {
+            userId?: string;
+            favoriteList?: components["schemas"]["gateway.api.v1.user.favorites.FavoriteDetail"][];
+        };
+        "gateway.api.v1.video.videoinfo.FavoriteVideoItem": {
+            video?: components["schemas"]["gateway.api.v1.video.videoinfo.VideoSummary"];
+            /**
+             * Format: date-time
+             * @description 收藏时间，不改变 video.created_time 的视频发布时间语义；历史空时间返回 null。
+             */
+            collectedAt?: string;
+        };
+        "gateway.api.v1.video.videoinfo.GetFavoriteVideosResp": {
+            videos?: components["schemas"]["gateway.api.v1.video.videoinfo.FavoriteVideoItem"][];
+            total?: string;
+            /** Format: int32 */
+            pageNum?: number;
+            /** Format: int32 */
+            pageSize?: number;
+        };
+        "gateway.api.v1.video.videoinfo.GetVideoUploadStatusResp": {
+            /** @enum {string} */
+            status?: "waiting_cover" | "waiting_video" | "uploading" | "processing" | "completed" | "failed";
+            /**
+             * Format: date-time
+             * @description 最近一次状态更新时间。已完成记录清理后，此字段为空。
+             */
+            updatedTime?: string | null;
+            /** @description 上传或处理失败时的提示。 */
+            uploadErrorMsg?: string;
+        };
+        /** @description UserVideoStatus 与下游个人状态字段对齐，1 表示已操作，-1 表示未操作。 */
+        "gateway.api.v1.video.videoinfo.UserVideoStatus": {
+            /** Format: int32 */
+            isUpvoted?: number;
+            /** Format: int32 */
+            isFavorited?: number;
+            /** Format: int32 */
+            isShared?: number;
+            /** Format: int32 */
+            isThrownShells?: number;
+            /** @description 未收藏时为 0，已收藏时为当前用户的收藏夹 ID。 */
+            favoriteId?: string;
+            /** @description 当前有效收藏记录 ID，取消操作必须携带。 */
+            favoriteRecordId?: string;
+        };
+        /** @description user_id 不作为身份来源，网关只使用鉴权 context 中的当前用户。 */
+        "gateway.api.v1.user.follow.CreateFollowListReq": {
+            userId?: string;
+            name?: string;
+        };
+        "gateway.api.v1.user.follow.CreateFollowListResp": {
+            followListId?: string;
+        };
+        "gateway.api.v1.user.follow.DeleteFollowListsReq": {
+            idList?: string[];
+        };
+        "gateway.api.v1.user.follow.FollowListInfo": {
+            followListId?: string;
+            userId?: string;
+            name?: string;
+            isDefault?: boolean;
+        };
+        "gateway.api.v1.user.follow.FollowListMutationResp": {
+            success?: boolean;
+        };
+        "gateway.api.v1.user.follow.GetFollowListsResp": {
+            lists?: components["schemas"]["gateway.api.v1.user.follow.FollowListInfo"][];
+        };
+        "gateway.api.v1.user.follow.GetFollowRelationResp": {
+            isFollowing?: boolean;
+            followListId?: string;
+        };
+        "gateway.api.v1.user.follow.ModifyFollowListReq": {
+            followListId?: string;
+            name?: string;
+        };
+        "gateway.api.v1.user.follow.MoveFolloweeReq": {
+            targetUserId?: string;
+            followListId?: string;
+        };
+        "gateway.api.v1.user.follow.SetDefaultFollowListReq": {
+            followListId?: string;
+        };
+        /** @description CommentReference 返回直接回复对象的完整正文，展示截断由前端负责。 */
+        "gateway.api.v1.video.comment.CommentReference": {
+            commentId?: string;
+            publisherId?: string;
+            content?: string;
+            unavailable?: boolean;
+        };
+        /** @description BarrageCursor 保存上一批最后一条弹幕的位置，绑定原视频及播放区间。 */
+        "gateway.api.v1.video.interact.BarrageCursor": {
+            /** @description 所属视频 ID，必须与本次请求一致。 */
+            videoId?: string;
+            /**
+             * Format: int32
+             * @description 原查询区间起点，单位为非负整数秒，包含该秒。
+             */
+            startSecond?: number;
+            /**
+             * Format: int32
+             * @description 原查询区间终点，单位为整数秒，不包含该秒。
+             */
+            endSecond?: number;
+            /**
+             * Format: int32
+             * @description 上一批最后一条已返回弹幕的播放位置，单位为整数秒。
+             */
+            positionSecond?: number;
+            /** @description 该弹幕的 ID，用于继续读取同秒的其他弹幕。 */
+            barrageId?: string;
+        };
+        "gateway.api.v1.video.interact.BarrageInfo": {
+            barrageId?: string;
+            publisherId?: string;
+            videoId?: string;
+            content?: string;
+            color?: string;
+            /** Format: int32 */
+            positionSecond?: number;
+            upvoteCount?: string;
+            isUpvoted?: boolean;
+        };
+        "gateway.api.v1.video.interact.GetBarragesResp": {
+            barrages?: components["schemas"]["gateway.api.v1.video.interact.BarrageInfo"][];
+            /** @description 仅有下一批时返回，否则为空。 */
+            nextCursor?: components["schemas"]["gateway.api.v1.video.interact.BarrageCursor"];
+            hasMore?: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -940,6 +1291,8 @@ export interface operations {
         parameters: {
             query?: {
                 email?: string;
+                /** @description 必填用途：register、change_email 或 reset_password。 */
+                purpose?: string;
             };
             header?: never;
             path?: never;
@@ -1074,7 +1427,7 @@ export interface operations {
             };
         };
     };
-    FileService_UploadAvatar: {
+    FileService_UpdateAvatar: {
         parameters: {
             query?: never;
             header?: never;
@@ -1096,8 +1449,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["gateway.api.v1.user.file.UploadAvatarResp"];
+                    "application/json": components["schemas"]["gateway.api.v1.user.file.UpdateAvatarResp"];
                 };
+            };
+        };
+    };
+    FileService_GetAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 头像图片，响应包含 ETag、Cache-Control 和 nosniff。 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                };
+            };
+            /** @description If-None-Match 与当前头像内容一致，无响应正文。 */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1177,9 +1560,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                userId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -1459,8 +1840,8 @@ export interface operations {
         parameters: {
             query?: {
                 class?: string[];
-                pageNum?: number;
-                pageSize?: number;
+                page_num?: number;
+                page_size?: number;
             };
             header?: never;
             path?: never;
@@ -1482,10 +1863,22 @@ export interface operations {
     VideoComment_GetCommentList: {
         parameters: {
             query?: {
-                pageNum?: number;
-                pageSize?: number;
-                sortBy?: string;
+                sort_by?: string;
                 order?: string;
+                /** @description 所属视频 ID，必须与本次请求一致。 */
+                "cursor.video_id"?: string;
+                /** @description 主评论列表为 0，回复列表为所属主评论 ID。 */
+                "cursor.root_id"?: string;
+                /** @description 排序字段：created_at 或 cnt_upvote。 */
+                "cursor.sort_by"?: string;
+                /** @description 排序方向：asc 或 desc；热度排序只允许 desc。 */
+                "cursor.order"?: string;
+                /** @description 上一批最后一条已返回评论的 ID，用于同值排序。 */
+                "cursor.comment_id"?: string;
+                /** @description 该评论的创建时间；按时间排序时必须提供。 */
+                "cursor.created_at"?: string;
+                /** @description 该评论在读取时的点赞数；不是固定的热度快照。 */
+                "cursor.upvote_count"?: string;
             };
             header?: never;
             path: {
@@ -1562,10 +1955,22 @@ export interface operations {
     VideoComment_GetCommentReplies: {
         parameters: {
             query?: {
-                pageNum?: number;
-                pageSize?: number;
-                sortBy?: string;
+                sort_by?: string;
                 order?: string;
+                /** @description 所属视频 ID，必须与本次请求一致。 */
+                "cursor.video_id"?: string;
+                /** @description 主评论列表为 0，回复列表为所属主评论 ID。 */
+                "cursor.root_id"?: string;
+                /** @description 排序字段：created_at 或 cnt_upvote。 */
+                "cursor.sort_by"?: string;
+                /** @description 排序方向：asc 或 desc；热度排序只允许 desc。 */
+                "cursor.order"?: string;
+                /** @description 上一批最后一条已返回评论的 ID，用于同值排序。 */
+                "cursor.comment_id"?: string;
+                /** @description 该评论的创建时间；按时间排序时必须提供。 */
+                "cursor.created_at"?: string;
+                /** @description 该评论在读取时的点赞数；不是固定的热度快照。 */
+                "cursor.upvote_count"?: string;
             };
             header?: never;
             path: {
@@ -1605,6 +2010,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["gateway.api.v1.video.videoinfo.GetVideoInfoResp"];
+                };
+            };
+        };
+    };
+    VideoInfo_GetVideoUploadStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                videoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.video.videoinfo.GetVideoUploadStatusResp"];
                 };
             };
         };
@@ -1664,9 +2091,9 @@ export interface operations {
     Follow_GetFolloweeInfo: {
         parameters: {
             query?: {
-                followListId?: string;
-                pageNum?: number;
-                pageSize?: number;
+                follow_list_id?: string;
+                page_num?: number;
+                page_size?: number;
             };
             header?: never;
             path: {
@@ -1683,35 +2110,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["gateway.api.v1.user.follow.GetFolloweeInfoResp"];
-                };
-            };
-        };
-    };
-    FileService_UpdateAvatar: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    avatar: string;
-                };
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["gateway.api.v1.user.file.UpdateAvatarResp"];
                 };
             };
         };
@@ -1822,7 +2220,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description 保留旧字段编号以识别旧请求；非空时拒绝，不再接受服务器文件路径。 */
-                segmentPath?: string;
+                segment_path?: string;
             };
             header?: never;
             path: {
@@ -1895,6 +2293,260 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["gateway.api.v1.video.videoinfo.UploadVideoFileResp"];
+                };
+            };
+        };
+    };
+    Favorite_GetFavoritesList: {
+        parameters: {
+            query?: {
+                /** @description 保留兼容字段；查询对象始终是当前登录用户。 */
+                user_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.favorites.GetFavoritesListResp"];
+                };
+            };
+        };
+    };
+    VideoInfo_GetFavoriteVideos: {
+        parameters: {
+            query?: {
+                /** @description 省略时分别使用第 1 页和每页 20 条；每页最多 100 条。 */
+                page_num?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                favoritesId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.video.videoinfo.GetFavoriteVideosResp"];
+                };
+            };
+        };
+    };
+    Follow_GetFollowLists: {
+        parameters: {
+            query?: {
+                user_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.GetFollowListsResp"];
+                };
+            };
+        };
+    };
+    Follow_CreateFollowList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["gateway.api.v1.user.follow.CreateFollowListReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.CreateFollowListResp"];
+                };
+            };
+        };
+    };
+    Follow_DeleteFollowLists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["gateway.api.v1.user.follow.DeleteFollowListsReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.FollowListMutationResp"];
+                };
+            };
+        };
+    };
+    Follow_ModifyFollowList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                followListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["gateway.api.v1.user.follow.ModifyFollowListReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.FollowListMutationResp"];
+                };
+            };
+        };
+    };
+    Follow_SetDefaultFollowList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                followListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["gateway.api.v1.user.follow.SetDefaultFollowListReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.FollowListMutationResp"];
+                };
+            };
+        };
+    };
+    Follow_GetFollowRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                targetUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.GetFollowRelationResp"];
+                };
+            };
+        };
+    };
+    Follow_MoveFollowee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                targetUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["gateway.api.v1.user.follow.MoveFolloweeReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.user.follow.FollowListMutationResp"];
+                };
+            };
+        };
+    };
+    VideoInteract_GetBarrages: {
+        parameters: {
+            query?: {
+                start_second?: number;
+                end_second?: number;
+                /** @description 所属视频 ID，必须与本次请求一致。 */
+                "cursor.video_id"?: string;
+                /** @description 原查询区间起点，单位为非负整数秒，包含该秒。 */
+                "cursor.start_second"?: number;
+                /** @description 原查询区间终点，单位为整数秒，不包含该秒。 */
+                "cursor.end_second"?: number;
+                /** @description 上一批最后一条已返回弹幕的播放位置，单位为整数秒。 */
+                "cursor.position_second"?: number;
+                /** @description 该弹幕的 ID，用于继续读取同秒的其他弹幕。 */
+                "cursor.barrage_id"?: string;
+            };
+            header?: never;
+            path: {
+                videoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["gateway.api.v1.video.interact.GetBarragesResp"];
                 };
             };
         };

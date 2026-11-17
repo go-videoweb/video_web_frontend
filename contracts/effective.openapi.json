@@ -18,6 +18,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "description": "必填用途：register、change_email 或 reset_password。",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -183,11 +191,11 @@
       }
     },
     "/api/v1/user/profile/avatar": {
-      "post": {
+      "put": {
         "tags": [
           "FileService"
         ],
-        "operationId": "FileService_UploadAvatar",
+        "operationId": "FileService_UpdateAvatar",
         "requestBody": {
           "required": true,
           "content": {
@@ -213,10 +221,51 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/gateway.api.v1.user.file.UploadAvatarResp"
+                  "$ref": "#/components/schemas/gateway.api.v1.user.file.UpdateAvatarResp"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{userId}/avatar": {
+      "get": {
+        "tags": [
+          "FileService"
+        ],
+        "description": "公开读取头像二进制；用户不存在返回 404，头像文件缺失时回退共享默认头像。",
+        "operationId": "FileService_GetAvatar",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "头像图片，响应包含 ETag、Cache-Control 和 nosniff。",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "If-None-Match 与当前头像内容一致，无响应正文。"
           }
         }
       }
@@ -321,22 +370,12 @@
         }
       }
     },
-    "/api/v1/userinfo/{userId}/forgetPassword": {
+    "/api/v1/userinfo/forgetPassword": {
       "post": {
         "tags": [
           "Userinfo"
         ],
         "operationId": "Userinfo_ForgetPassword",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -769,7 +808,7 @@
             }
           },
           {
-            "name": "pageNum",
+            "name": "page_num",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -777,7 +816,7 @@
             }
           },
           {
-            "name": "pageSize",
+            "name": "page_size",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -815,23 +854,7 @@
             }
           },
           {
-            "name": "pageNum",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "sortBy",
+            "name": "sort_by",
             "in": "query",
             "schema": {
               "type": "string"
@@ -840,6 +863,63 @@
           {
             "name": "order",
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.video_id",
+            "in": "query",
+            "description": "所属视频 ID，必须与本次请求一致。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.root_id",
+            "in": "query",
+            "description": "主评论列表为 0，回复列表为所属主评论 ID。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.sort_by",
+            "in": "query",
+            "description": "排序字段：created_at 或 cnt_upvote。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.order",
+            "in": "query",
+            "description": "排序方向：asc 或 desc；热度排序只允许 desc。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.comment_id",
+            "in": "query",
+            "description": "上一批最后一条已返回评论的 ID，用于同值排序。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.created_at",
+            "in": "query",
+            "description": "该评论的创建时间；按时间排序时必须提供。",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "cursor.upvote_count",
+            "in": "query",
+            "description": "该评论在读取时的点赞数；不是固定的热度快照。",
             "schema": {
               "type": "string"
             }
@@ -969,23 +1049,7 @@
             }
           },
           {
-            "name": "pageNum",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "sortBy",
+            "name": "sort_by",
             "in": "query",
             "schema": {
               "type": "string"
@@ -994,6 +1058,63 @@
           {
             "name": "order",
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.video_id",
+            "in": "query",
+            "description": "所属视频 ID，必须与本次请求一致。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.root_id",
+            "in": "query",
+            "description": "主评论列表为 0，回复列表为所属主评论 ID。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.sort_by",
+            "in": "query",
+            "description": "排序字段：created_at 或 cnt_upvote。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.order",
+            "in": "query",
+            "description": "排序方向：asc 或 desc；热度排序只允许 desc。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.comment_id",
+            "in": "query",
+            "description": "上一批最后一条已返回评论的 ID，用于同值排序。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.created_at",
+            "in": "query",
+            "description": "该评论的创建时间；按时间排序时必须提供。",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "cursor.upvote_count",
+            "in": "query",
+            "description": "该评论在读取时的点赞数；不是固定的热度快照。",
             "schema": {
               "type": "string"
             }
@@ -1036,6 +1157,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.GetVideoInfoResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video/{videoId}/upload-status": {
+      "get": {
+        "tags": [
+          "VideoInfo"
+        ],
+        "description": "发布者查询视频的上传和处理进度。业务失败通过响应体的 code、reason 和 message 返回。",
+        "operationId": "VideoInfo_GetVideoUploadStatus",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.GetVideoUploadStatusResp"
                 }
               }
             }
@@ -1137,14 +1289,14 @@
             }
           },
           {
-            "name": "followListId",
+            "name": "follow_list_id",
             "in": "query",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "pageNum",
+            "name": "page_num",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -1152,7 +1304,7 @@
             }
           },
           {
-            "name": "pageSize",
+            "name": "page_size",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -1174,61 +1326,12 @@
         }
       }
     },
-    "/api/v1/{userId}/profile/avatar": {
-      "put": {
-        "tags": [
-          "FileService"
-        ],
-        "operationId": "FileService_UpdateAvatar",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "avatar"
-                ],
-                "properties": {
-                  "avatar": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/gateway.api.v1.user.file.UpdateAvatarResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/{userId}/video/metaInfo": {
       "post": {
         "tags": [
           "VideoInfo"
         ],
-        "description": "Request Order: 1. UploadVideoInfo 2. UploadVideoFile 3. UploadVideoCover\n 1(UploadVideoInfo) Will Create a new directory for the video,\n 2(UploadVideoFile) and 3(UploadVideoCover) will upload the video file and cover file to the directory.\n The order of 2 and 3 is not important.",
+        "description": "投稿顺序为上传视频元信息、封面、原片。",
         "operationId": "VideoInfo_UploadVideoInfo",
         "parameters": [
           {
@@ -1430,7 +1533,7 @@
             }
           },
           {
-            "name": "segmentPath",
+            "name": "segment_path",
             "in": "query",
             "description": "保留旧字段编号以识别旧请求；非空时拒绝，不再接受服务器文件路径。",
             "schema": {
@@ -1495,6 +1598,7 @@
         "tags": [
           "VideoInfo"
         ],
+        "description": "原片落盘后返回，视频服务随后在后台生成 DASH。",
         "operationId": "VideoInfo_UploadVideoFile",
         "parameters": [
           {
@@ -1546,6 +1650,411 @@
           }
         }
       }
+    },
+    "/api/v1/favorites/list": {
+      "get": {
+        "tags": [
+          "Favorite"
+        ],
+        "description": "获取当前登录用户的全部收藏夹，包含公开和私密收藏夹。",
+        "operationId": "Favorite_GetFavoritesList",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "保留兼容字段；查询对象始终是当前登录用户。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.favorites.GetFavoritesListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/favorites/{favoritesId}/videos": {
+      "get": {
+        "tags": [
+          "VideoInfo"
+        ],
+        "description": "登录后分页读取本人收藏夹或其他用户的公开收藏夹。",
+        "operationId": "VideoInfo_GetFavoriteVideos",
+        "parameters": [
+          {
+            "name": "favoritesId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_num",
+            "in": "query",
+            "description": "省略时分别使用第 1 页和每页 20 条；每页最多 100 条。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.GetFavoriteVideosResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow-lists": {
+      "get": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_GetFollowLists",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.GetFollowListsResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_CreateFollowList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gateway.api.v1.user.follow.CreateFollowListReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.CreateFollowListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow-lists/batch-delete": {
+      "post": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_DeleteFollowLists",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gateway.api.v1.user.follow.DeleteFollowListsReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.FollowListMutationResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow-lists/{followListId}": {
+      "patch": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_ModifyFollowList",
+        "parameters": [
+          {
+            "name": "followListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gateway.api.v1.user.follow.ModifyFollowListReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.FollowListMutationResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow-lists/{followListId}/default": {
+      "put": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_SetDefaultFollowList",
+        "parameters": [
+          {
+            "name": "followListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gateway.api.v1.user.follow.SetDefaultFollowListReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.FollowListMutationResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow/relations/{targetUserId}": {
+      "get": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_GetFollowRelation",
+        "parameters": [
+          {
+            "name": "targetUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.GetFollowRelationResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/follow/relations/{targetUserId}/list": {
+      "put": {
+        "tags": [
+          "Follow"
+        ],
+        "operationId": "Follow_MoveFollowee",
+        "parameters": [
+          {
+            "name": "targetUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gateway.api.v1.user.follow.MoveFolloweeReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.user.follow.FollowListMutationResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video/{videoId}/barrages": {
+      "get": {
+        "tags": [
+          "VideoInteract"
+        ],
+        "operationId": "VideoInteract_GetBarrages",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_second",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "end_second",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "cursor.video_id",
+            "in": "query",
+            "description": "所属视频 ID，必须与本次请求一致。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor.start_second",
+            "in": "query",
+            "description": "原查询区间起点，单位为非负整数秒，包含该秒。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "cursor.end_second",
+            "in": "query",
+            "description": "原查询区间终点，单位为整数秒，不包含该秒。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "cursor.position_second",
+            "in": "query",
+            "description": "上一批最后一条已返回弹幕的播放位置，单位为整数秒。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "cursor.barrage_id",
+            "in": "query",
+            "description": "该弹幕的 ID，用于继续读取同秒的其他弹幕。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.api.v1.video.interact.GetBarragesResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1558,9 +2067,6 @@
             "format": "int32"
           },
           "msg": {
-            "type": "string"
-          },
-          "code": {
             "type": "string"
           }
         }
@@ -1608,7 +2114,8 @@
             "type": "string"
           },
           "userId": {
-            "type": "string"
+            "type": "string",
+            "description": "保留兼容字段；实际创建者以网关鉴权上下文为准。"
           }
         }
       },
@@ -1621,6 +2128,10 @@
           },
           "msg": {
             "type": "string"
+          },
+          "favoriteId": {
+            "type": "string",
+            "description": "数据库保存成功后的收藏夹 ID。"
           }
         }
       },
@@ -1666,14 +2177,6 @@
           }
         }
       },
-      "gateway.api.v1.user.file.UpdateAvatarReq": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string"
-          }
-        }
-      },
       "gateway.api.v1.user.file.UpdateAvatarResp": {
         "type": "object",
         "properties": {
@@ -1683,14 +2186,10 @@
           },
           "message": {
             "type": "string"
-          }
-        }
-      },
-      "gateway.api.v1.user.file.UploadAvatarResp": {
-        "type": "object",
-        "properties": {
-          "filePath": {
-            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "浏览器可访问的 API 相对地址，不是磁盘路径。"
           }
         }
       },
@@ -1701,7 +2200,8 @@
             "type": "string"
           },
           "followerUserId": {
-            "type": "string"
+            "type": "string",
+            "description": "旧字段名，实际表示被关注的目标用户，不是操作人。"
           },
           "followListId": {
             "type": "string"
@@ -1716,6 +2216,12 @@
             "format": "int32"
           },
           "message": {
+            "type": "string"
+          },
+          "isFollowing": {
+            "type": "boolean"
+          },
+          "followListId": {
             "type": "string"
           }
         }
@@ -1735,6 +2241,17 @@
             "items": {
               "$ref": "#/components/schemas/gateway.api.v1.user.follow.GetFolloweeInfoResp_UserSummary"
             }
+          },
+          "total": {
+            "type": "string"
+          },
+          "pageNum": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1745,7 +2262,8 @@
             "type": "string"
           },
           "avatarPath": {
-            "type": "string"
+            "type": "string",
+            "description": "头像 API 相对 URL，保留原字段名，不再返回服务器路径。"
           },
           "gender": {
             "type": "integer",
@@ -1760,6 +2278,13 @@
           "birthday": {
             "type": "string",
             "format": "date-time"
+          },
+          "userId": {
+            "type": "string",
+            "description": "被关注用户的 ID，用于用户主页跳转和关注关系操作。"
+          },
+          "followListId": {
+            "type": "string"
           }
         }
       },
@@ -1905,6 +2430,10 @@
           },
           "refreshToken": {
             "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "description": "注册成功创建的用户 ID，与 access token 中身份一致。"
           }
         }
       },
@@ -1923,9 +2452,6 @@
       "gateway.api.v1.user.userinfo.ForgetPasswordReq": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string"
-          },
           "email": {
             "type": "string"
           },
@@ -2065,7 +2591,8 @@
             "format": "int32"
           },
           "avatarPath": {
-            "type": "string"
+            "type": "string",
+            "description": "头像 API 相对 URL，保留原字段名，不再返回服务器路径。"
           },
           "gender": {
             "type": "integer",
@@ -2086,6 +2613,41 @@
             "$ref": "#/components/schemas/gateway.api.v1.user.userinfo.CommonResp"
           }
         }
+      },
+      "gateway.api.v1.video.comment.CommentCursor": {
+        "type": "object",
+        "properties": {
+          "videoId": {
+            "type": "string",
+            "description": "所属视频 ID，必须与本次请求一致。"
+          },
+          "rootId": {
+            "type": "string",
+            "description": "主评论列表为 0，回复列表为所属主评论 ID。"
+          },
+          "sortBy": {
+            "type": "string",
+            "description": "排序字段：created_at 或 cnt_upvote。"
+          },
+          "order": {
+            "type": "string",
+            "description": "排序方向：asc 或 desc；热度排序只允许 desc。"
+          },
+          "commentId": {
+            "type": "string",
+            "description": "上一批最后一条已返回评论的 ID，用于同值排序。"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "该评论的创建时间；按时间排序时必须提供。",
+            "format": "date-time"
+          },
+          "upvoteCount": {
+            "type": "string",
+            "description": "该评论在读取时的点赞数；不是固定的热度快照。"
+          }
+        },
+        "description": "CommentCursor 保存上一批最后一条评论的位置，不能跨视频、楼层或排序复用。"
       },
       "gateway.api.v1.video.comment.CommentInfo": {
         "type": "object",
@@ -2115,6 +2677,15 @@
           "cntReplies": {
             "type": "integer",
             "format": "uint32"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "isUpvoted": {
+            "type": "boolean"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/gateway.api.v1.video.comment.CommentReference"
           }
         }
       },
@@ -2152,6 +2723,17 @@
           "totalCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "nextCursor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway.api.v1.video.comment.CommentCursor"
+              }
+            ],
+            "description": "仅有下一批时返回，否则为空。"
+          },
+          "hasMore": {
+            "type": "boolean"
           }
         }
       },
@@ -2163,6 +2745,17 @@
             "items": {
               "$ref": "#/components/schemas/gateway.api.v1.video.comment.CommentInfo"
             }
+          },
+          "nextCursor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway.api.v1.video.comment.CommentCursor"
+              }
+            ],
+            "description": "仅有下一批时返回，否则为空。"
+          },
+          "hasMore": {
+            "type": "boolean"
           }
         }
       },
@@ -2175,9 +2768,8 @@
           "videoId": {
             "type": "string"
           },
-          "isUpvote": {
-            "type": "boolean",
-            "description": "If is_upvote is true, the user has upvoted the comment before, so we need to cancel the upvote.\n Otherwise, the user has not upvoted the comment before, so we need to add the upvote."
+          "liked": {
+            "type": "boolean"
           }
         }
       },
@@ -2190,6 +2782,12 @@
           },
           "message": {
             "type": "string"
+          },
+          "isUpvoted": {
+            "type": "boolean"
+          },
+          "upvoteCount": {
+            "type": "string"
           }
         }
       },
@@ -2201,6 +2799,15 @@
           },
           "favoriteId": {
             "type": "string"
+          },
+          "favorite": {
+            "type": "integer",
+            "description": "1 表示收藏，-1 表示取消；不再根据当前状态自动切换。",
+            "format": "int32"
+          },
+          "favoriteRecordId": {
+            "type": "string",
+            "description": "取消时必须携带当前收藏记录 ID，收藏时必须为 0。"
           }
         }
       },
@@ -2212,6 +2819,15 @@
             "format": "int32"
           },
           "message": {
+            "type": "string"
+          },
+          "isFavorited": {
+            "type": "boolean"
+          },
+          "favoriteId": {
+            "type": "string"
+          },
+          "favoriteRecordId": {
             "type": "string"
           }
         }
@@ -2228,11 +2844,9 @@
           "color": {
             "type": "string"
           },
-          "time": {
-            "type": "string"
-          },
-          "upvoteCount": {
-            "type": "string"
+          "positionSecond": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -2295,6 +2909,9 @@
           },
           "barrageId": {
             "type": "string"
+          },
+          "liked": {
+            "type": "boolean"
           }
         }
       },
@@ -2306,6 +2923,12 @@
             "format": "int32"
           },
           "message": {
+            "type": "string"
+          },
+          "isUpvoted": {
+            "type": "boolean"
+          },
+          "upvoteCount": {
             "type": "string"
           }
         }
@@ -2375,6 +2998,14 @@
         "properties": {
           "videoDetail": {
             "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.VideoMetaInfo"
+          },
+          "userVideoStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.UserVideoStatus"
+              }
+            ],
+            "description": "游客不返回个人状态；身份仅由鉴权上下文确定。"
           }
         }
       },
@@ -2554,6 +3185,336 @@
           "createdTime": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "gateway.api.v1.user.favorites.FavoriteDetail": {
+        "type": "object",
+        "properties": {
+          "favoriteId": {
+            "type": "string"
+          },
+          "favoriteName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "true 表示私密，对应数据库 is_private=-1；false 表示公开。"
+          }
+        }
+      },
+      "gateway.api.v1.user.favorites.GetFavoritesListResp": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "favoriteList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.api.v1.user.favorites.FavoriteDetail"
+            }
+          }
+        }
+      },
+      "gateway.api.v1.video.videoinfo.FavoriteVideoItem": {
+        "type": "object",
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.VideoSummary"
+          },
+          "collectedAt": {
+            "type": "string",
+            "description": "收藏时间，不改变 video.created_time 的视频发布时间语义；历史空时间返回 null。",
+            "format": "date-time"
+          }
+        }
+      },
+      "gateway.api.v1.video.videoinfo.GetFavoriteVideosResp": {
+        "type": "object",
+        "properties": {
+          "videos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.api.v1.video.videoinfo.FavoriteVideoItem"
+            }
+          },
+          "total": {
+            "type": "string"
+          },
+          "pageNum": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "gateway.api.v1.video.videoinfo.GetVideoUploadStatusResp": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting_cover",
+              "waiting_video",
+              "uploading",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "updatedTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "最近一次状态更新时间。已完成记录清理后，此字段为空。"
+          },
+          "uploadErrorMsg": {
+            "type": "string",
+            "description": "上传或处理失败时的提示。"
+          }
+        }
+      },
+      "gateway.api.v1.video.videoinfo.UserVideoStatus": {
+        "type": "object",
+        "properties": {
+          "isUpvoted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isFavorited": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isShared": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isThrownShells": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "favoriteId": {
+            "type": "string",
+            "description": "未收藏时为 0，已收藏时为当前用户的收藏夹 ID。"
+          },
+          "favoriteRecordId": {
+            "type": "string",
+            "description": "当前有效收藏记录 ID，取消操作必须携带。"
+          }
+        },
+        "description": "UserVideoStatus 与下游个人状态字段对齐，1 表示已操作，-1 表示未操作。"
+      },
+      "gateway.api.v1.user.follow.CreateFollowListReq": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "user_id 不作为身份来源，网关只使用鉴权 context 中的当前用户。"
+      },
+      "gateway.api.v1.user.follow.CreateFollowListResp": {
+        "type": "object",
+        "properties": {
+          "followListId": {
+            "type": "string"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.DeleteFollowListsReq": {
+        "type": "object",
+        "properties": {
+          "idList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.FollowListInfo": {
+        "type": "object",
+        "properties": {
+          "followListId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.FollowListMutationResp": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.GetFollowListsResp": {
+        "type": "object",
+        "properties": {
+          "lists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.api.v1.user.follow.FollowListInfo"
+            }
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.GetFollowRelationResp": {
+        "type": "object",
+        "properties": {
+          "isFollowing": {
+            "type": "boolean"
+          },
+          "followListId": {
+            "type": "string"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.ModifyFollowListReq": {
+        "type": "object",
+        "properties": {
+          "followListId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.MoveFolloweeReq": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          },
+          "followListId": {
+            "type": "string"
+          }
+        }
+      },
+      "gateway.api.v1.user.follow.SetDefaultFollowListReq": {
+        "type": "object",
+        "properties": {
+          "followListId": {
+            "type": "string"
+          }
+        }
+      },
+      "gateway.api.v1.video.comment.CommentReference": {
+        "type": "object",
+        "properties": {
+          "commentId": {
+            "type": "string"
+          },
+          "publisherId": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "unavailable": {
+            "type": "boolean"
+          }
+        },
+        "description": "CommentReference 返回直接回复对象的完整正文，展示截断由前端负责。"
+      },
+      "gateway.api.v1.video.interact.BarrageCursor": {
+        "type": "object",
+        "properties": {
+          "videoId": {
+            "type": "string",
+            "description": "所属视频 ID，必须与本次请求一致。"
+          },
+          "startSecond": {
+            "type": "integer",
+            "description": "原查询区间起点，单位为非负整数秒，包含该秒。",
+            "format": "int32"
+          },
+          "endSecond": {
+            "type": "integer",
+            "description": "原查询区间终点，单位为整数秒，不包含该秒。",
+            "format": "int32"
+          },
+          "positionSecond": {
+            "type": "integer",
+            "description": "上一批最后一条已返回弹幕的播放位置，单位为整数秒。",
+            "format": "int32"
+          },
+          "barrageId": {
+            "type": "string",
+            "description": "该弹幕的 ID，用于继续读取同秒的其他弹幕。"
+          }
+        },
+        "description": "BarrageCursor 保存上一批最后一条弹幕的位置，绑定原视频及播放区间。"
+      },
+      "gateway.api.v1.video.interact.BarrageInfo": {
+        "type": "object",
+        "properties": {
+          "barrageId": {
+            "type": "string"
+          },
+          "publisherId": {
+            "type": "string"
+          },
+          "videoId": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "positionSecond": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "upvoteCount": {
+            "type": "string"
+          },
+          "isUpvoted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "gateway.api.v1.video.interact.GetBarragesResp": {
+        "type": "object",
+        "properties": {
+          "barrages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.api.v1.video.interact.BarrageInfo"
+            }
+          },
+          "nextCursor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway.api.v1.video.interact.BarrageCursor"
+              }
+            ],
+            "description": "仅有下一批时返回，否则为空。"
+          },
+          "hasMore": {
+            "type": "boolean"
           }
         }
       }

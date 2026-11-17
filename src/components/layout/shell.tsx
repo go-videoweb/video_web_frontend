@@ -2,6 +2,8 @@ import { Link, Outlet, useRouterState } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import {
   Camera,
+  Bookmark,
+  Users,
   ChevronRight,
   Compass,
   Cpu,
@@ -138,6 +140,25 @@ function Navigation({ close }: { close?: () => void }) {
       </div>
       <div className="nav-section">
         <p className="nav-label">我的空间</p>
+        <Link
+          to="/favorites"
+          search={{ folder: undefined }}
+          className="nav-link"
+          activeProps={{ className: 'nav-link nav-active' }}
+          onClick={close}
+        >
+          <Bookmark size={19} />
+          收藏夹
+        </Link>
+        <Link
+          to="/following"
+          className="nav-link"
+          activeProps={{ className: 'nav-link nav-active' }}
+          onClick={close}
+        >
+          <Users size={19} />
+          关注
+        </Link>
         <Link
           to="/upload"
           className="nav-link"

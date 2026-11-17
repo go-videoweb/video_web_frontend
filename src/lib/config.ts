@@ -11,7 +11,6 @@ export const config = {
     .split(',')
     .map((v: string) => v.trim())
     .filter(Boolean),
-  siteOrigin: import.meta.env.VITE_SITE_ORIGIN || window.location.origin,
   demo,
 }
 
