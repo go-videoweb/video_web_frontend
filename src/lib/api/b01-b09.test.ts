@@ -1,3 +1,4 @@
+import { ErrorCode } from './error-codes'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { session } from '@/features/auth/session'
 import { resetPassword, sendEmailCode } from '@/features/auth/api'
@@ -88,13 +89,14 @@ describe('ba2604fd HTTP 契约', () => {
   it('保留业务错误 reason 和部分成功元数据', () => {
     expect(
       businessError({
-        code: 500,
+        code: ErrorCode.PasswordSessionInvalidationFailed,
         reason: 'PASSWORD_SESSION_INVALIDATION_FAILED',
         message: '已更新',
         metadata: { password_changed: 'true', session_revoked: 'false' },
       }),
     ).toMatchObject({
       reason: 'PASSWORD_SESSION_INVALIDATION_FAILED',
+      code: ErrorCode.PasswordSessionInvalidationFailed,
       metadata: { password_changed: 'true', session_revoked: 'false' },
     })
   })

@@ -1,0 +1,67 @@
+/** 后端 f6cfcc39 中前端会话策略及模拟响应使用的业务码；不等于 HTTP 状态码。 */
+export const ErrorCode = {
+  Internal: 3001,
+  LoggedOut: 3002,
+  TokenMissing: 3003,
+  TokenInvalid: 3004,
+  AccessTokenExpired: 3005,
+  RefreshTokenExpired: 3006,
+  TokenParseFailed: 3007,
+  TokenCreateFailed: 3008,
+  FormFileFailed: 3009,
+  RegistrationSessionFailed: 3101,
+  InvalidCodePurpose: 3104,
+  InvalidBarrageLike: 3105,
+  InvalidCommentLike: 3109,
+  AvatarRequired: 3115,
+  InvalidUserId: 3123,
+  InvalidIdentity: 3124,
+  Unauthorized: 3127,
+  UserIdMissing: 3128,
+  InvalidUserIdUnauthorized: 3129,
+  UserNameEmpty: 4003,
+  UserPasswordEmpty: 4004,
+  UserPasswordError: 4006,
+  FavoriteNotEmpty: 4039,
+  PasswordSessionInvalidationFailed: 4101,
+  InvalidEmail: 4109,
+  InvalidPassword: 4110,
+  InvalidEmailCode: 4114,
+  EmailCodeRateLimited: 4115,
+  UserFavoriteNotFound: 4118,
+  FollowListNotFound: 4132,
+  DefaultFollowListDelete: 4136,
+  FollowNotFound: 4139,
+  VideoUploadForbidden: 5106,
+  CoverUploadStage: 5107,
+  FileUploadStage: 5108,
+  UploadStatusNotFound: 5110,
+  InvalidBarrage: 5203,
+  BarrageNotFound: 5204,
+  CommentNotFound: 5209,
+  FavoriteNotFound: 5218,
+  VideoAlreadyFavorited: 5220,
+  FavoriteRecordChanged: 5221,
+  VideoNotFound: 5233,
+} as const
+
+const authenticationCodes = new Set<number>([
+  ErrorCode.LoggedOut,
+  ErrorCode.TokenMissing,
+  ErrorCode.TokenInvalid,
+  ErrorCode.AccessTokenExpired,
+  ErrorCode.RefreshTokenExpired,
+  ErrorCode.TokenParseFailed,
+  ErrorCode.InvalidIdentity,
+  ErrorCode.Unauthorized,
+  ErrorCode.UserIdMissing,
+  ErrorCode.InvalidUserIdUnauthorized,
+  // 保留旧业务响应的兼容分类；真实 HTTP 状态仍由请求层独立检查。
+  401,
+  403,
+])
+
+/** 只将明确身份错误视为会话失效；同名 reason 或相邻数值不能扩大分类。 */
+export function isAuthenticationCode(code: number): boolean {
+  return authenticationCodes.has(code)
+}
