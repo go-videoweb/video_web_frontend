@@ -1,3 +1,4 @@
+import { ErrorCode } from './error-codes'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, businessError, request } from './client'
 import { session } from '@/features/auth/session'
@@ -35,7 +36,11 @@ describe('API 契约与会话', () => {
     const fetch = vi
       .fn()
       .mockResolvedValueOnce(
-        json({ code: 3005, reason: 'EXPIRED', metadata: { access_token: 'new-access' } }),
+        json({
+          code: ErrorCode.AccessTokenExpired,
+          reason: 'EXPIRED',
+          metadata: { access_token: 'new-access' },
+        }),
       )
       .mockResolvedValueOnce(json({ statusCode: 200 }))
     vi.stubGlobal('fetch', fetch)
@@ -48,22 +53,26 @@ describe('API 契约与会话', () => {
   })
   it('刷新响应再次过期时不会形成重试循环', async () => {
     session.set(identity)
-    const fetch = vi
-      .fn()
-      .mockImplementation(() =>
-        Promise.resolve(
-          json({ code: 3005, reason: 'EXPIRED', metadata: { access_token: 'new-access' } }),
-        ),
-      )
+    const fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        json({
+          code: ErrorCode.AccessTokenExpired,
+          reason: 'EXPIRED',
+          metadata: { access_token: 'new-access' },
+        }),
+      ),
+    )
     vi.stubGlobal('fetch', fetch)
     await expect(request('/video/interaction/1/upvote', { method: 'PUT' })).rejects.toMatchObject({
-      code: 3005,
+      code: ErrorCode.AccessTokenExpired,
     })
     expect(fetch).toHaveBeenCalledTimes(2)
   })
   it('缺少新 token 的错误不会重发操作', async () => {
     session.set(identity)
-    const fetch = vi.fn().mockResolvedValue(json({ code: 3005, reason: 'EXPIRED' }))
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(json({ code: ErrorCode.AccessTokenExpired, reason: 'EXPIRED' }))
     vi.stubGlobal('fetch', fetch)
     await expect(
       request('/video/1/comment', { method: 'POST', body: { content: 'test' } }),
@@ -94,7 +103,11 @@ describe('API 契约与会话', () => {
       values.push(authorization)
       return Promise.resolve(
         authorization === 'Bearer old-access'
-          ? json({ code: 3005, reason: 'EXPIRED', metadata: { access_token: 'new-access' } })
+          ? json({
+              code: ErrorCode.AccessTokenExpired,
+              reason: 'EXPIRED',
+              metadata: { access_token: 'new-access' },
+            })
           : json({ statusCode: 200 }),
       )
     })
@@ -122,7 +135,13 @@ describe('API 契约与会话', () => {
     const pending = request('/private')
     await vi.waitFor(() => expect(resolve).toBeTypeOf('function'))
     session.set(null)
-    resolve(json({ code: 3005, reason: 'EXPIRED', metadata: { access_token: 'late-access' } }))
+    resolve(
+      json({
+        code: ErrorCode.AccessTokenExpired,
+        reason: 'EXPIRED',
+        metadata: { access_token: 'late-access' },
+      }),
+    )
     await expect(pending).rejects.toBeInstanceOf(ApiError)
     expect(session.get()).toBeNull()
   })
@@ -151,22 +170,29 @@ describe('API 契约与会话', () => {
     session.set(identity)
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(json({ code: 3004, reason: 'INVALID', message: '请重新登录' })),
+      vi
+        .fn()
+        .mockResolvedValue(
+          json({ code: ErrorCode.TokenInvalid, reason: 'INVALID', message: '请重新登录' }),
+        ),
     )
-    await expect(request('/private')).rejects.toMatchObject({ code: 3004 })
+    await expect(request('/private')).rejects.toMatchObject({ code: ErrorCode.TokenInvalid })
     expect(session.get()).toBeNull()
   })
   it('下载接口的纯文本 JSON 错误不会被保存成视频', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ code: 3003, reason: 'MISSING', message: '请先登录' }), {
-          headers: { 'Content-Type': 'text/plain' },
-        }),
+        new Response(
+          JSON.stringify({ code: ErrorCode.TokenMissing, reason: 'MISSING', message: '请先登录' }),
+          {
+            headers: { 'Content-Type': 'text/plain' },
+          },
+        ),
       ),
     )
     await expect(request('/0/video/1/file', { response: 'blob' })).rejects.toMatchObject({
-      code: 3003,
+      code: ErrorCode.TokenMissing,
     })
   })
   it('提前拒绝超过下载限制的文件响应', async () => {

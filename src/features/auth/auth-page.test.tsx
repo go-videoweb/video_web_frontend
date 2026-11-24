@@ -1,3 +1,4 @@
+import { ErrorCode } from '@/lib/api/error-codes'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {
@@ -48,14 +49,16 @@ it('无效登录表单不发送请求并显示字段错误', async () => {
 it('业务失败保留用户输入并展示服务端说明', async () => {
   vi.stubGlobal(
     'fetch',
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({ code: 4001, reason: 'LOGIN_FAILED', message: '用户名或密码错误' }),
-          { headers: { 'Content-Type': 'application/json' } },
-        ),
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: ErrorCode.UserPasswordError,
+          reason: '用户密码错误',
+          message: '用户名或密码错误',
+        }),
+        { headers: { 'Content-Type': 'application/json' } },
       ),
+    ),
   )
   renderLogin()
   await userEvent.type(await screen.findByLabelText('用户名'), 'somebody')

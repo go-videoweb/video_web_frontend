@@ -1,5 +1,6 @@
 import { config } from '@/lib/config'
 import { session } from '@/features/auth/session'
+import { ErrorCode, isAuthenticationCode } from './error-codes'
 
 /** 统一业务错误保留业务码，禁止按可能变化的错误文案判断身份。 */
 export class ApiError extends Error {
@@ -14,7 +15,7 @@ export class ApiError extends Error {
     this.name = 'ApiError'
   }
   get authentication() {
-    return [3002, 3003, 3004, 3005, 3006, 3007, 401, 403].includes(this.code)
+    return isAuthenticationCode(this.code)
   }
 }
 
@@ -115,7 +116,7 @@ async function perform<T>(path: string, options: Options, retry: boolean): Promi
     : await boundedBlob(response)
   const error = businessError(data, response.status)
   if (
-    error?.code === 3005 &&
+    error?.code === ErrorCode.AccessTokenExpired &&
     auth &&
     retry &&
     snapshot &&
